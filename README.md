@@ -1,7 +1,4 @@
-<<<<<<< HEAD
-# PyFishPack
-=======
-# **fishpack - A Fortran library for solving of separable elliptic partial differential equations**
+# **PyFishPack - A Fortran library for solving of separable elliptic partial differential equations**
  
 A modernization of NCAR's FISHPACK90.
 
