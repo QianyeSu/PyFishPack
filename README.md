@@ -1,4 +1,4 @@
-# **fishpack - A Fortran library for solving of separable elliptic partial differential equations**
+# **PyFishPack - A Fortran library for solving of separable elliptic partial differential equations**
  
 A modernization of NCAR's FISHPACK90.
 
@@ -184,3 +184,4 @@ git clone https://github.com/jlokimlin/fishpack.git; cd fishpack; make all
 
 
 ```
+>>>>>>> dev

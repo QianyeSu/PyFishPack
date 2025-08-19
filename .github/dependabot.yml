@@ -1,0 +1,32 @@
+# Simplified Dependabot configuration for stable dependency management
+version: 2
+updates:
+  # Python dependencies via pip (requirements.txt and pyproject.toml)
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly" # Changed to weekly for stability
+      day: "monday"
+      time: "06:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 3 # Reduced number
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    # Only allow patch and minor updates for stability
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+  # GitHub Actions - also weekly
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "07:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 2
+    commit-message:
+      prefix: "ci"
+      include: "scope"
