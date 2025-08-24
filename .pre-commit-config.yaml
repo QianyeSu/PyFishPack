@@ -1,0 +1,114 @@
+# PyFishPack Pre-commit Configuration
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+
+# Set the default stage to commit, only checking during git commit
+default_stages:
+  - pre-commit
+
+# Set the default language version
+default_language_version:
+  python: python3.12
+
+repos:
+  # Basic file quality checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-symlinks
+      - id: check-merge-conflict
+      - id: check-json
+      - id: check-toml
+      - id: check-added-large-files
+        args: ['--maxkb=1000']  # Prevent files larger than 1MB
+      - id: check-case-conflict
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
+
+  # Python code formatting with Black
+  - repo: https://github.com/psf/black
+    rev: 24.10.0
+    hooks:
+      - id: black
+        types: [python]
+        exclude: ^(docs/|build/|PyFishPack/build/|.*\.pyx$)
+        args: [--line-length=88]
+
+  # Python import sorting with isort
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        types: [python]
+        exclude: ^(docs/|build/|PyFishPack/build/)
+        args: [--profile=black, --line-length=88]
+
+  # Python code linting with flake8
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.1.1
+    hooks:
+      - id: flake8
+        types: [python]
+        exclude: ^(docs/|build/|PyFishPack/build/|setup.py)
+        args:
+          - --max-line-length=88
+          - --extend-ignore=E203,W503,E501
+          - --max-complexity=10
+
+  # Python docstring formatting
+  - repo: https://github.com/pycqa/pydocstyle
+    rev: 6.3.0
+    hooks:
+      - id: pydocstyle
+        types: [python]
+        exclude: ^(docs/|build/|PyFishPack/build/|setup.py|tests/)
+        args:
+          - --convention=numpy
+          - --add-ignore=D100,D101,D102,D103,D104,D105
+
+  # Security check with bandit
+  - repo: https://github.com/pycqa/bandit
+    rev: 1.7.9
+    hooks:
+      - id: bandit
+        types: [python]
+        exclude: ^(docs/|build/|PyFishPack/build/|tests/)
+        args: [--skip=B101,B601]
+
+  # Markdown and text formatting
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v4.0.0-alpha.8
+    hooks:
+      - id: prettier
+        types_or: [markdown, yaml, json]
+        exclude: ^(build/|PyFishPack/build/)
+
+  # Check Python type hints
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.11.2
+    hooks:
+      - id: mypy
+        types: [python]
+        exclude: ^(docs/|build/|PyFishPack/build/|setup.py|tests/)
+        additional_dependencies: [numpy]
+        args:
+          - --python-version=3.9
+          - --ignore-missing-imports
+          - --no-strict-optional
+
+# Configure which files to check
+exclude: |
+  (?x)^(
+    PyFishPack/build/.*|
+    PyFishPack/src/.*\.f$|
+    PyFishPack/src/.*\.pyf$|
+    PyFishPack/examples/.*\.f90$|
+    build/.*|
+    .*\.pyd$|
+    .*\.so$|
+    .*\.dylib$|
+    .*\.dll$
+  )$
