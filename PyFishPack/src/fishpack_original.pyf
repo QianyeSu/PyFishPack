@@ -1,0 +1,2119 @@
+!    -*- f90 -*-
+! Note: the context of this file is case sensitive.
+
+python module blktr1__user__routines 
+    interface blktr1_user_interface 
+        subroutine prdct(nm2,e_b_im2_err,nm3,e_b_im3_err,nm1,e_b_im1_err,e_0_err,dum,e_y_1_i2_err,w3,m,am,bm,cm,wd,ww,wu) ! in :fishpack:blktri.f:blktr1:unknown_interface
+            integer :: nm2
+            real :: e_b_im2_err
+            integer :: nm3
+            real :: e_b_im3_err
+            integer :: nm1
+            real :: e_b_im1_err
+            integer :: e_0_err
+            real :: dum
+            real :: e_y_1_i2_err
+            real dimension(*) :: w3
+            integer :: m
+            real dimension(*) :: am
+            real dimension(*) :: bm
+            real dimension(*) :: cm
+            real dimension(*) :: wd
+            real dimension(*) :: ww
+            real dimension(*) :: wu
+        end subroutine prdct
+        subroutine cprdct(e_nm_1_err,e_b_ip_err,nm1,e_b_im1_err,e_0_errrr,dum,e_0_errrrr,dum1,e_y_1_nm_1_errrr,e_y_1_nm_1_errrrr,m,am,bm,cm,w1,w3,ww) ! in :fishpack:blktri.f:blktr1:unknown_interface
+            real :: e_nm_1_err
+            real :: e_b_ip_err
+            integer :: nm1
+            real :: e_b_im1_err
+            integer :: e_0_errrr
+            real :: dum
+            integer :: e_0_errrrr
+            real :: dum1
+            real :: e_y_1_nm_1_errrr
+            real :: e_y_1_nm_1_errrrr
+            integer :: m
+            real dimension(*) :: am
+            real dimension(*) :: bm
+            real dimension(*) :: cm
+            real dimension(*) :: w1
+            real dimension(*) :: w3
+            real dimension(*) :: ww
+        end subroutine cprdct
+    end interface blktr1_user_interface
+end python module blktr1__user__routines
+python module cblkt1__user__routines 
+    interface cblkt1_user_interface 
+        subroutine prdct(nm2,e_b_im2_err,nm3,e_b_im3_err,nm1,e_b_im1_err,e_0_err,dum,e_y_1_i2_err,w3,m,am,bm,cm,wd,ww,wu) ! in :fishpack:cblktri.f:cblkt1:unknown_interface
+            integer :: nm2
+            real :: e_b_im2_err
+            integer :: nm3
+            real :: e_b_im3_err
+            integer :: nm1
+            real :: e_b_im1_err
+            integer :: e_0_err
+            real :: dum
+            complex :: e_y_1_i2_err
+            complex dimension(*) :: w3
+            integer :: m
+            complex dimension(*) :: am
+            complex dimension(*) :: bm
+            complex dimension(*) :: cm
+            complex dimension(*) :: wd
+            complex dimension(*) :: ww
+            complex dimension(*) :: wu
+        end subroutine prdct
+        subroutine cprdct(e_nm_1_err,e_b_ip_err,nm1,e_b_im1_err,e_0_errrr,dum,e_0_errrrr,dum1,e_y_1_nm_1_errrr,e_y_1_nm_1_errrrr,m,am,bm,cm,w1,w3,ww) ! in :fishpack:cblktri.f:cblkt1:unknown_interface
+            real :: e_nm_1_err
+            real :: e_b_ip_err
+            integer :: nm1
+            real :: e_b_im1_err
+            integer :: e_0_errrr
+            real :: dum
+            integer :: e_0_errrrr
+            real :: dum1
+            complex :: e_y_1_nm_1_errrr
+            complex :: e_y_1_nm_1_errrrr
+            integer :: m
+            complex dimension(*) :: am
+            complex dimension(*) :: bm
+            complex dimension(*) :: cm
+            complex dimension(*) :: w1
+            complex dimension(*) :: w3
+            complex dimension(*) :: ww
+        end subroutine cprdct
+    end interface cblkt1_user_interface
+end python module cblkt1__user__routines
+python module spelip__user__routines 
+    interface spelip_user_interface 
+        subroutine cofx(xi,ai,bi,ci) ! in :fishpack:sepeli.f:spelip:unknown_interface
+            real :: xi
+            real :: ai
+            real :: bi
+            real :: ci
+        end subroutine cofx
+        subroutine cofy(yj,dj,ej,fj) ! in :fishpack:sepeli.f:spelip:unknown_interface
+            real :: yj
+            real :: dj
+            real :: ej
+            real :: fj
+        end subroutine cofy
+    end interface spelip_user_interface
+end python module spelip__user__routines
+python module chkprm__user__routines 
+    interface chkprm_user_interface 
+        subroutine cofx(xi,ai,bi,ci) ! in :fishpack:sepeli.f:chkprm:unknown_interface
+            real :: xi
+            real :: ai
+            real :: bi
+            real :: ci
+        end subroutine cofx
+        subroutine cofy(yj,dj,ej,fj) ! in :fishpack:sepeli.f:chkprm:unknown_interface
+            real :: yj
+            real :: dj
+            real :: ej
+            real :: fj
+        end subroutine cofy
+    end interface chkprm_user_interface
+end python module chkprm__user__routines
+python module chksng__user__routines 
+    interface chksng_user_interface 
+        subroutine cofx(xi,ai,bi,ci) ! in :fishpack:sepeli.f:chksng:unknown_interface
+            real :: xi
+            real :: ai
+            real :: bi
+            real :: ci
+        end subroutine cofx
+        subroutine cofy(yj,dj,ej,fj) ! in :fishpack:sepeli.f:chksng:unknown_interface
+            real :: yj
+            real :: dj
+            real :: ej
+            real :: fj
+        end subroutine cofy
+    end interface chksng_user_interface
+end python module chksng__user__routines
+python module defer__user__routines 
+    interface defer_user_interface 
+        subroutine cofx(xi,ai,bi,ci) ! in :fishpack:sepeli.f:defer:unknown_interface
+            real :: xi
+            real :: ai
+            real :: bi
+            real :: ci
+        end subroutine cofx
+        subroutine cofy(yj,dj,ej,fj) ! in :fishpack:sepeli.f:defer:unknown_interface
+            real :: yj
+            real :: dj
+            real :: ej
+            real :: fj
+        end subroutine cofy
+    end interface defer_user_interface
+end python module defer__user__routines
+python module s4elip__user__routines 
+    interface s4elip_user_interface 
+        subroutine cofx(xi,ai,bi,ci) ! in :fishpack:sepx4.f:s4elip:unknown_interface
+            real :: xi
+            real :: ai
+            real :: bi
+            real :: ci
+        end subroutine cofx
+    end interface s4elip_user_interface
+end python module s4elip__user__routines
+python module c4kprm__user__routines 
+    interface c4kprm_user_interface 
+        subroutine cofx(xi,ai,bi,ci) ! in :fishpack:sepx4.f:c4kprm:unknown_interface
+            real :: xi
+            real :: ai
+            real :: bi
+            real :: ci
+        end subroutine cofx
+    end interface c4kprm_user_interface
+end python module c4kprm__user__routines
+python module c4ksng__user__routines 
+    interface c4ksng_user_interface 
+        subroutine cofx(xi,ai,bi,ci) ! in :fishpack:sepx4.f:c4ksng:unknown_interface
+            real :: xi
+            real :: ai
+            real :: bi
+            real :: ci
+        end subroutine cofx
+    end interface c4ksng_user_interface
+end python module c4ksng__user__routines
+python module d4fer__user__routines 
+    interface d4fer_user_interface 
+        subroutine cofx(xi,ai,bi,ci) ! in :fishpack:sepx4.f:d4fer:unknown_interface
+            real :: xi
+            real :: ai
+            real :: bi
+            real :: ci
+        end subroutine cofx
+    end interface d4fer_user_interface
+end python module d4fer__user__routines
+python module fishpack ! in 
+    interface  ! in :fishpack
+        subroutine blktri(iflg,np,n,an,bn,cn,mp,m,am,bm,cm,idimy,y,ierror,w) ! in :fishpack:blktri.f
+            integer :: iflg
+            integer :: np
+            integer :: n
+            real dimension(*) :: an
+            real dimension(*) :: bn
+            real dimension(*) :: cn
+            integer :: mp
+            integer :: m
+            real dimension(*) :: am
+            real dimension(*) :: bm
+            real dimension(*) :: cm
+            integer, optional,check(shape(y, 0) == idimy),depend(y) :: idimy=shape(y, 0)
+            real dimension(idimy,1) :: y
+            integer :: ierror
+            real dimension(*) :: w
+            integer :: npp
+            integer :: k
+            real :: eps
+            real :: cnv
+            integer :: nm
+            integer :: ncmplx
+            integer :: ik
+            common /cblkt/ npp,k,eps,cnv,nm,ncmplx,ik
+        end subroutine blktri
+        subroutine blktr1(n,an,bn,cn,m,am,bm,cm,idimy,y,b,w1,w2,w3,wd,ww,wu,prdct,cprdct) ! in :fishpack:blktri.f
+            use blktr1__user__routines
+            integer :: n
+            real dimension(*) :: an
+            real dimension(*) :: bn
+            real dimension(*) :: cn
+            integer :: m
+            real dimension(*) :: am
+            real dimension(*) :: bm
+            real dimension(*) :: cm
+            integer, optional,check(shape(y, 0) == idimy),depend(y) :: idimy=shape(y, 0)
+            real dimension(idimy,1) :: y
+            real dimension(*) :: b
+            real dimension(*) :: w1
+            real dimension(*) :: w2
+            real dimension(*) :: w3
+            real dimension(*) :: wd
+            real dimension(*) :: ww
+            real dimension(*) :: wu
+            external prdct
+            external cprdct
+            integer :: npp
+            integer :: k
+            real :: eps
+            real :: cnv
+            integer :: nm
+            integer :: ncmplx
+            integer :: ik
+            common /cblkt/ npp,k,eps,cnv,nm,ncmplx,ik
+        end subroutine blktr1
+        function bsrh(xll,xrr,iz,c,a,bh,f,sgn) ! in :fishpack:blktri.f
+            real :: xll
+            real :: xrr
+            integer :: iz
+            real dimension(*) :: c
+            real dimension(*) :: a
+            real dimension(*) :: bh
+            real :: f
+            real :: sgn
+            integer :: npp
+            integer :: k
+            real :: eps
+            real :: cnv
+            integer :: nm
+            integer :: ncmplx
+            integer :: ik
+            real :: bsrh
+            common /cblkt/ npp,k,eps,cnv,nm,ncmplx,ik
+        end function bsrh
+        subroutine compb(n,ierror,an,bn,cn,b,ah,bh) ! in :fishpack:blktri.f
+            integer :: n
+            integer :: ierror
+            real dimension(*) :: an
+            real dimension(*) :: bn
+            real dimension(*) :: cn
+            real dimension(*) :: b
+            real dimension(*) :: ah
+            real dimension(*) :: bh
+            integer :: npp
+            integer :: k
+            real :: eps
+            real :: cnv
+            integer :: nm
+            integer :: ncmplx
+            integer :: ik
+            common /cblkt/ npp,k,eps,cnv,nm,ncmplx,ik
+        end subroutine compb
+        subroutine cprod(nd,bd,nm1,bm1,nm2,bm2,na,aa,x,yy,m,a,b,c,d,w,y) ! in :fishpack:blktri.f
+            integer :: nd
+            complex dimension(*) :: bd
+            integer :: nm1
+            real dimension(*) :: bm1
+            integer :: nm2
+            real dimension(*) :: bm2
+            integer :: na
+            real dimension(*) :: aa
+            real dimension(*) :: x
+            real dimension(*) :: yy
+            integer :: m
+            real dimension(*) :: a
+            real dimension(*) :: b
+            real dimension(*) :: c
+            complex dimension(*) :: d
+            complex dimension(*) :: w
+            complex dimension(*) :: y
+        end subroutine cprod
+        subroutine cprodp(nd,bd,nm1,bm1,nm2,bm2,na,aa,x,yy,m,a,b,c,d,u,y) ! in :fishpack:blktri.f
+            integer :: nd
+            complex dimension(*) :: bd
+            integer :: nm1
+            real dimension(*) :: bm1
+            integer :: nm2
+            real dimension(*) :: bm2
+            integer :: na
+            real dimension(*) :: aa
+            real dimension(*) :: x
+            real dimension(*) :: yy
+            integer :: m
+            real dimension(*) :: a
+            real dimension(*) :: b
+            real dimension(*) :: c
+            complex dimension(*) :: d
+            complex dimension(*) :: u
+            complex dimension(*) :: y
+        end subroutine cprodp
+        subroutine indxa(i,ir,idxa,na) ! in :fishpack:blktri.f
+            integer :: i
+            integer :: ir
+            integer :: idxa
+            integer :: na
+            integer :: npp
+            integer :: k
+            real :: eps
+            real :: cnv
+            integer :: nm
+            integer :: ncmplx
+            integer :: ik
+            common /cblkt/ npp,k,eps,cnv,nm,ncmplx,ik
+        end subroutine indxa
+        subroutine indxb(i,ir,idx,idp) ! in :fishpack:blktri.f
+            integer :: i
+            integer :: ir
+            integer :: idx
+            integer :: idp
+            integer :: npp
+            integer :: k
+            real :: eps
+            real :: cnv
+            integer :: nm
+            integer :: ncmplx
+            integer :: ik
+            common /cblkt/ npp,k,eps,cnv,nm,ncmplx,ik
+        end subroutine indxb
+        subroutine indxc(i,ir,idxc,nc) ! in :fishpack:blktri.f
+            integer :: i
+            integer :: ir
+            integer :: idxc
+            integer :: nc
+            integer :: npp
+            integer :: k
+            real :: eps
+            real :: cnv
+            integer :: nm
+            integer :: ncmplx
+            integer :: ik
+            common /cblkt/ npp,k,eps,cnv,nm,ncmplx,ik
+        end subroutine indxc
+        subroutine ppadd(n,ierror,a,c,cbp,bp,bh) ! in :fishpack:blktri.f
+            integer :: n
+            integer :: ierror
+            real dimension(*) :: a
+            real dimension(*) :: c
+            complex dimension(*) :: cbp
+            real dimension(*) :: bp
+            real dimension(*) :: bh
+            integer :: npp
+            integer :: k
+            real :: eps
+            real :: cnv
+            integer :: nm
+            integer :: ncmplx
+            integer :: ik
+            common /cblkt/ npp,k,eps,cnv,nm,ncmplx,ik
+        end subroutine ppadd
+        subroutine prod(nd,bd,nm1,bm1,nm2,bm2,na,aa,x,y,m,a,b,c,d,w,u) ! in :fishpack:blktri.f
+            integer :: nd
+            real dimension(*) :: bd
+            integer :: nm1
+            real dimension(*) :: bm1
+            integer :: nm2
+            real dimension(*) :: bm2
+            integer :: na
+            real dimension(*) :: aa
+            real dimension(*) :: x
+            real dimension(*) :: y
+            integer :: m
+            real dimension(*) :: a
+            real dimension(*) :: b
+            real dimension(*) :: c
+            real dimension(*) :: d
+            real dimension(*) :: w
+            real dimension(*) :: u
+        end subroutine prod
+        subroutine prodp(nd,bd,nm1,bm1,nm2,bm2,na,aa,x,y,m,a,b,c,d,u,w) ! in :fishpack:blktri.f
+            integer :: nd
+            real dimension(*) :: bd
+            integer :: nm1
+            real dimension(*) :: bm1
+            integer :: nm2
+            real dimension(*) :: bm2
+            integer :: na
+            real dimension(*) :: aa
+            real dimension(*) :: x
+            real dimension(*) :: y
+            integer :: m
+            real dimension(*) :: a
+            real dimension(*) :: b
+            real dimension(*) :: c
+            real dimension(*) :: d
+            real dimension(*) :: u
+            real dimension(*) :: w
+        end subroutine prodp
+        subroutine tevls(n,d,e2,ierr) ! in :fishpack:blktri.f
+            integer, optional,check(shape(d, 0) == n),depend(d) :: n=shape(d, 0)
+            real dimension(n) :: d
+            real dimension(n),depend(n) :: e2
+            integer :: ierr
+            integer :: npp
+            integer :: k
+            real :: machep
+            real :: cnv
+            integer :: nm
+            integer :: ncmplx
+            integer :: ik
+            common /cblkt/ npp,k,machep,cnv,nm,ncmplx,ik
+        end subroutine tevls
+        subroutine cblktr(iflg,np,n,an,bn,cn,mp,m,am,bm,cm,idimy,y,ierror,w) ! in :fishpack:cblktri.f
+            integer :: iflg
+            integer :: np
+            integer :: n
+            real dimension(*) :: an
+            real dimension(*) :: bn
+            real dimension(*) :: cn
+            integer :: mp
+            integer :: m
+            complex dimension(*) :: am
+            complex dimension(*) :: bm
+            complex dimension(*) :: cm
+            integer, optional,check(shape(y, 0) == idimy),depend(y) :: idimy=shape(y, 0)
+            complex dimension(idimy,1) :: y
+            integer :: ierror
+            real dimension(*) :: w
+            integer :: npp
+            integer :: k
+            real :: eps
+            real :: cnv
+            integer :: nm
+            integer :: ncmplx
+            integer :: ik
+            common /ccblk/ npp,k,eps,cnv,nm,ncmplx,ik
+        end subroutine cblktr
+        subroutine cblkt1(n,an,bn,cn,m,am,bm,cm,idimy,y,b,w1,w2,w3,wd,ww,wu,prdct,cprdct) ! in :fishpack:cblktri.f
+            use cblkt1__user__routines
+            integer :: n
+            real dimension(*) :: an
+            real dimension(*) :: bn
+            real dimension(*) :: cn
+            integer :: m
+            complex dimension(*) :: am
+            complex dimension(*) :: bm
+            complex dimension(*) :: cm
+            integer, optional,check(shape(y, 0) == idimy),depend(y) :: idimy=shape(y, 0)
+            complex dimension(idimy,1) :: y
+            real dimension(*) :: b
+            complex dimension(*) :: w1
+            complex dimension(*) :: w2
+            complex dimension(*) :: w3
+            complex dimension(*) :: wd
+            complex dimension(*) :: ww
+            complex dimension(*) :: wu
+            external prdct
+            external cprdct
+            integer :: npp
+            integer :: k
+            real :: eps
+            real :: cnv
+            integer :: nm
+            integer :: ncmplx
+            integer :: ik
+            common /ccblk/ npp,k,eps,cnv,nm,ncmplx,ik
+        end subroutine cblkt1
+        function cbsrh(xll,xrr,iz,c,a,bh,f,sgn) ! in :fishpack:cblktri.f
+            real :: xll
+            real :: xrr
+            integer :: iz
+            real dimension(*) :: c
+            real dimension(*) :: a
+            real dimension(*) :: bh
+            real :: f
+            real :: sgn
+            integer :: npp
+            integer :: k
+            real :: eps
+            real :: cnv
+            integer :: nm
+            integer :: ncmplx
+            integer :: ik
+            real :: cbsrh
+            common /ccblk/ npp,k,eps,cnv,nm,ncmplx,ik
+        end function cbsrh
+        subroutine ccompb(n,ierror,an,bn,cn,b,ah,bh) ! in :fishpack:cblktri.f
+            integer :: n
+            integer :: ierror
+            real dimension(*) :: an
+            real dimension(*) :: bn
+            real dimension(*) :: cn
+            real dimension(*) :: b
+            real dimension(*) :: ah
+            real dimension(*) :: bh
+            integer :: npp
+            integer :: k
+            real :: eps
+            real :: cnv
+            integer :: nm
+            integer :: ncmplx
+            integer :: ik
+            common /ccblk/ npp,k,eps,cnv,nm,ncmplx,ik
+        end subroutine ccompb
+        subroutine cproc(nd,bd,nm1,bm1,nm2,bm2,na,aa,x,y,m,a,b,c,d,w,yy) ! in :fishpack:cblktri.f
+            integer :: nd
+            complex dimension(*) :: bd
+            integer :: nm1
+            real dimension(*) :: bm1
+            integer :: nm2
+            real dimension(*) :: bm2
+            integer :: na
+            real dimension(*) :: aa
+            complex dimension(*) :: x
+            complex dimension(*) :: y
+            integer :: m
+            complex dimension(*) :: a
+            complex dimension(*) :: b
+            complex dimension(*) :: c
+            complex dimension(*) :: d
+            complex dimension(*) :: w
+            real dimension(*) :: yy
+        end subroutine cproc
+        subroutine cprocp(nd,bd,nm1,bm1,nm2,bm2,na,aa,x,y,m,a,b,c,d,u,yy) ! in :fishpack:cblktri.f
+            integer :: nd
+            complex dimension(*) :: bd
+            integer :: nm1
+            real dimension(*) :: bm1
+            integer :: nm2
+            real dimension(*) :: bm2
+            integer :: na
+            real dimension(*) :: aa
+            complex dimension(*) :: x
+            complex dimension(*) :: y
+            integer :: m
+            complex dimension(*) :: a
+            complex dimension(*) :: b
+            complex dimension(*) :: c
+            complex dimension(*) :: d
+            complex dimension(*) :: u
+            real dimension(*) :: yy
+        end subroutine cprocp
+        subroutine cindxa(i,ir,idxa,na) ! in :fishpack:cblktri.f
+            integer :: i
+            integer :: ir
+            integer :: idxa
+            integer :: na
+            integer :: npp
+            integer :: k
+            real :: eps
+            real :: cnv
+            integer :: nm
+            integer :: ncmplx
+            integer :: ik
+            common /ccblk/ npp,k,eps,cnv,nm,ncmplx,ik
+        end subroutine cindxa
+        subroutine cindxb(i,ir,idx,idp) ! in :fishpack:cblktri.f
+            integer :: i
+            integer :: ir
+            integer :: idx
+            integer :: idp
+            integer :: npp
+            integer :: k
+            real :: eps
+            real :: cnv
+            integer :: nm
+            integer :: ncmplx
+            integer :: ik
+            common /ccblk/ npp,k,eps,cnv,nm,ncmplx,ik
+        end subroutine cindxb
+        subroutine cindxc(i,ir,idxc,nc) ! in :fishpack:cblktri.f
+            integer :: i
+            integer :: ir
+            integer :: idxc
+            integer :: nc
+            integer :: npp
+            integer :: k
+            real :: eps
+            real :: cnv
+            integer :: nm
+            integer :: ncmplx
+            integer :: ik
+            common /ccblk/ npp,k,eps,cnv,nm,ncmplx,ik
+        end subroutine cindxc
+        subroutine cppadd(n,ierror,a,c,cbp,bp,bh) ! in :fishpack:cblktri.f
+            integer :: n
+            integer :: ierror
+            real dimension(*) :: a
+            real dimension(*) :: c
+            complex dimension(*) :: cbp
+            real dimension(*) :: bp
+            real dimension(*) :: bh
+            integer :: npp
+            integer :: k
+            real :: eps
+            real :: cnv
+            integer :: nm
+            integer :: ncmplx
+            integer :: ik
+            common /ccblk/ npp,k,eps,cnv,nm,ncmplx,ik
+        end subroutine cppadd
+        subroutine proc(nd,bd,nm1,bm1,nm2,bm2,na,aa,x,y,m,a,b,c,d,w,u) ! in :fishpack:cblktri.f
+            integer :: nd
+            real dimension(*) :: bd
+            integer :: nm1
+            real dimension(*) :: bm1
+            integer :: nm2
+            real dimension(*) :: bm2
+            integer :: na
+            real dimension(*) :: aa
+            complex dimension(*) :: x
+            complex dimension(*) :: y
+            integer :: m
+            complex dimension(*) :: a
+            complex dimension(*) :: b
+            complex dimension(*) :: c
+            complex dimension(*) :: d
+            complex dimension(*) :: w
+            complex dimension(*) :: u
+        end subroutine proc
+        subroutine procp(nd,bd,nm1,bm1,nm2,bm2,na,aa,x,y,m,a,b,c,d,u,w) ! in :fishpack:cblktri.f
+            integer :: nd
+            real dimension(*) :: bd
+            integer :: nm1
+            real dimension(*) :: bm1
+            integer :: nm2
+            real dimension(*) :: bm2
+            integer :: na
+            real dimension(*) :: aa
+            complex dimension(*) :: x
+            complex dimension(*) :: y
+            integer :: m
+            complex dimension(*) :: a
+            complex dimension(*) :: b
+            complex dimension(*) :: c
+            complex dimension(*) :: d
+            complex dimension(*) :: u
+            complex dimension(*) :: w
+        end subroutine procp
+        subroutine ctevls(n,d,e2,ierr) ! in :fishpack:cblktri.f
+            integer, optional,check(shape(d, 0) == n),depend(d) :: n=shape(d, 0)
+            real dimension(n) :: d
+            real dimension(n),depend(n) :: e2
+            integer :: ierr
+            integer :: npp
+            integer :: k
+            real :: machep
+            real :: cnv
+            integer :: nm
+            integer :: ncmplx
+            integer :: ik
+            common /ccblk/ npp,k,machep,cnv,nm,ncmplx,ik
+        end subroutine ctevls
+        subroutine cmgnbn(nperod,n,mperod,m,a,b,c,idimy,y,ierror,w) ! in :fishpack:cmgnbn.f
+            integer :: nperod
+            integer :: n
+            integer :: mperod
+            integer :: m
+            complex dimension(*) :: a
+            complex dimension(*) :: b
+            complex dimension(*) :: c
+            integer, optional,check(shape(y, 0) == idimy),depend(y) :: idimy=shape(y, 0)
+            complex dimension(idimy,1) :: y
+            integer :: ierror
+            complex dimension(*) :: w
+        end subroutine cmgnbn
+        subroutine cmposd(mr,nr,istag,ba,bb,bc,q,idimq,b,w,d,tcos,p) ! in :fishpack:cmgnbn.f
+            integer :: mr
+            integer :: nr
+            integer :: istag
+            complex dimension(*) :: ba
+            complex dimension(*) :: bb
+            complex dimension(*) :: bc
+            complex dimension(idimq,1) :: q
+            integer, optional,check(shape(q, 0) == idimq),depend(q) :: idimq=shape(q, 0)
+            complex dimension(*) :: b
+            complex dimension(*) :: w
+            complex dimension(*) :: d
+            complex dimension(*) :: tcos
+            complex dimension(*) :: p
+        end subroutine cmposd
+        subroutine cmposn(m,n,istag,mixbnd,a,bb,c,q,idimq,b,b2,b3,w,w2,w3,d,tcos,p) ! in :fishpack:cmgnbn.f
+            integer :: m
+            integer :: n
+            integer :: istag
+            integer :: mixbnd
+            complex dimension(*) :: a
+            complex dimension(*) :: bb
+            complex dimension(*) :: c
+            complex dimension(idimq,*) :: q
+            integer, optional,check(shape(q, 0) == idimq),depend(q) :: idimq=shape(q, 0)
+            complex dimension(*) :: b
+            complex dimension(*) :: b2
+            complex dimension(*) :: b3
+            complex dimension(*) :: w
+            complex dimension(*) :: w2
+            complex dimension(*) :: w3
+            complex dimension(*) :: d
+            complex dimension(*) :: tcos
+            complex dimension(*) :: p
+        end subroutine cmposn
+        subroutine cmposp(m,n,a,bb,c,q,idimq,b,b2,b3,w,w2,w3,d,tcos,p) ! in :fishpack:cmgnbn.f
+            integer :: m
+            integer :: n
+            complex dimension(*) :: a
+            complex dimension(*) :: bb
+            complex dimension(*) :: c
+            complex dimension(idimq,1) :: q
+            integer, optional,check(shape(q, 0) == idimq),depend(q) :: idimq=shape(q, 0)
+            complex dimension(*) :: b
+            complex dimension(*) :: b2
+            complex dimension(*) :: b3
+            complex dimension(*) :: w
+            complex dimension(*) :: w2
+            complex dimension(*) :: w3
+            complex dimension(*) :: d
+            complex dimension(*) :: tcos
+            complex dimension(*) :: p
+        end subroutine cmposp
+        subroutine cmpcsg(n,ijump,fnum,fden,a) ! in :fishpack:cmgnbn.f
+            integer :: n
+            integer :: ijump
+            real :: fnum
+            real :: fden
+            complex dimension(*) :: a
+        end subroutine cmpcsg
+        subroutine cmpmrg(tcos,i1,m1,i2,m2,i3) ! in :fishpack:cmgnbn.f
+            complex dimension(*) :: tcos
+            integer :: i1
+            integer :: m1
+            integer :: i2
+            integer :: m2
+            integer :: i3
+        end subroutine cmpmrg
+        subroutine cmptrx(idegbr,idegcr,m,a,b,c,y,tcos,d,w) ! in :fishpack:cmgnbn.f
+            integer :: idegbr
+            integer :: idegcr
+            integer :: m
+            complex dimension(*) :: a
+            complex dimension(*) :: b
+            complex dimension(*) :: c
+            complex dimension(*) :: y
+            complex dimension(*) :: tcos
+            complex dimension(*) :: d
+            complex dimension(*) :: w
+        end subroutine cmptrx
+        subroutine cmptr3(m,a,b,c,k,y1,y2,y3,tcos,d,w1,w2,w3) ! in :fishpack:cmgnbn.f
+            integer :: m
+            complex dimension(*) :: a
+            complex dimension(*) :: b
+            complex dimension(*) :: c
+            integer dimension(4) :: k
+            complex dimension(*) :: y1
+            complex dimension(*) :: y2
+            complex dimension(*) :: y3
+            complex dimension(*) :: tcos
+            complex dimension(*) :: d
+            complex dimension(*) :: w1
+            complex dimension(*) :: w2
+            complex dimension(*) :: w3
+        end subroutine cmptr3
+        function epmach(dum) ! in :fishpack:comf.f
+            real :: dum
+            real :: v
+            real :: epmach
+            common /value/ v
+        end function epmach
+        subroutine strwrd(x) ! in :fishpack:comf.f
+            real :: x
+            real :: v
+            common /value/ v
+        end subroutine strwrd
+        function ppsgf(x,iz,c,a,bh) ! in :fishpack:comf.f
+            real :: x
+            integer :: iz
+            real dimension(*) :: c
+            real dimension(*) :: a
+            real dimension(*) :: bh
+            real :: ppsgf
+        end function ppsgf
+        function ppspf(x,iz,c,a,bh) ! in :fishpack:comf.f
+            real :: x
+            integer :: iz
+            real dimension(*) :: c
+            real dimension(*) :: a
+            real dimension(*) :: bh
+            real :: ppspf
+        end function ppspf
+        function psgf(x,iz,c,a,bh) ! in :fishpack:comf.f
+            real :: x
+            integer :: iz
+            real dimension(*) :: c
+            real dimension(*) :: a
+            real dimension(*) :: bh
+            real :: psgf
+        end function psgf
+        subroutine ezfftf(n,r,azero,a,b,wsave) ! in :fishpack:fftpack.f
+            integer :: n
+            real dimension(*) :: r
+            real :: azero
+            real dimension(*) :: a
+            real dimension(*) :: b
+            real dimension(*) :: wsave
+        end subroutine ezfftf
+        subroutine ezfftb(n,r,azero,a,b,wsave) ! in :fishpack:fftpack.f
+            integer :: n
+            real dimension(*) :: r
+            real :: azero
+            real dimension(*) :: a
+            real dimension(*) :: b
+            real dimension(*) :: wsave
+        end subroutine ezfftb
+        subroutine ezffti(n,wsave) ! in :fishpack:fftpack.f
+            integer :: n
+            real dimension(*) :: wsave
+        end subroutine ezffti
+        subroutine ezfft1(n,wa,ifac) ! in :fishpack:fftpack.f
+            integer :: n
+            real dimension(*) :: wa
+            integer dimension(*) :: ifac
+        end subroutine ezfft1
+        subroutine costi(n,wsave) ! in :fishpack:fftpack.f
+            integer :: n
+            real dimension(*) :: wsave
+        end subroutine costi
+        subroutine cost(n,x,wsave) ! in :fishpack:fftpack.f
+            integer :: n
+            real dimension(*) :: x
+            real dimension(*) :: wsave
+        end subroutine cost
+        subroutine sinti(n,wsave) ! in :fishpack:fftpack.f
+            integer :: n
+            real dimension(*) :: wsave
+        end subroutine sinti
+        subroutine sint(n,x,wsave) ! in :fishpack:fftpack.f
+            integer :: n
+            real dimension(*) :: x
+            real dimension(*) :: wsave
+        end subroutine sint
+        subroutine sint1(n,war,was,xh,x,ifac) ! in :fishpack:fftpack.f
+            integer :: n
+            real dimension(*) :: war
+            real dimension(*) :: was
+            real dimension(*) :: xh
+            real dimension(*) :: x
+            integer dimension(*) :: ifac
+        end subroutine sint1
+        subroutine cosqi(n,wsave) ! in :fishpack:fftpack.f
+            integer :: n
+            real dimension(*) :: wsave
+        end subroutine cosqi
+        subroutine cosqf(n,x,wsave) ! in :fishpack:fftpack.f
+            integer :: n
+            real dimension(*) :: x
+            real dimension(*) :: wsave
+        end subroutine cosqf
+        subroutine cosqf1(n,x,w,xh) ! in :fishpack:fftpack.f
+            integer :: n
+            real dimension(*) :: x
+            real dimension(*) :: w
+            real dimension(*) :: xh
+        end subroutine cosqf1
+        subroutine cosqb(n,x,wsave) ! in :fishpack:fftpack.f
+            integer :: n
+            real dimension(*) :: x
+            real dimension(*) :: wsave
+        end subroutine cosqb
+        subroutine cosqb1(n,x,w,xh) ! in :fishpack:fftpack.f
+            integer :: n
+            real dimension(*) :: x
+            real dimension(*) :: w
+            real dimension(*) :: xh
+        end subroutine cosqb1
+        subroutine sinqi(n,wsave) ! in :fishpack:fftpack.f
+            integer :: n
+            real dimension(*) :: wsave
+        end subroutine sinqi
+        subroutine sinqf(n,x,wsave) ! in :fishpack:fftpack.f
+            integer :: n
+            real dimension(*) :: x
+            real dimension(*) :: wsave
+        end subroutine sinqf
+        subroutine sinqb(n,x,wsave) ! in :fishpack:fftpack.f
+            integer :: n
+            real dimension(*) :: x
+            real dimension(*) :: wsave
+        end subroutine sinqb
+        subroutine cffti(n,wsave) ! in :fishpack:fftpack.f
+            integer :: n
+            real dimension(*) :: wsave
+        end subroutine cffti
+        subroutine cffti1(n,wa,ifac) ! in :fishpack:fftpack.f
+            integer :: n
+            real dimension(*) :: wa
+            integer dimension(*) :: ifac
+        end subroutine cffti1
+        subroutine cfftb(n,c,wsave) ! in :fishpack:fftpack.f
+            integer :: n
+            real dimension(*) :: c
+            real dimension(*) :: wsave
+        end subroutine cfftb
+        subroutine cfftb1(n,c,ch,wa,ifac) ! in :fishpack:fftpack.f
+            integer :: n
+            real dimension(*) :: c
+            real dimension(*) :: ch
+            real dimension(*) :: wa
+            integer dimension(*) :: ifac
+        end subroutine cfftb1
+        subroutine passb2(ido,l1,cc,ch,wa1) ! in :fishpack:fftpack.f
+            integer, optional,check(shape(cc, 0) == ido),depend(cc) :: ido=shape(cc, 0)
+            integer, optional,check(shape(cc, 2) == l1),depend(cc) :: l1=shape(cc, 2)
+            real dimension(ido,2,l1) :: cc
+            real dimension(ido,l1,2),depend(l1,ido) :: ch
+            real dimension(1) :: wa1
+        end subroutine passb2
+        subroutine passb3(ido,l1,cc,ch,wa1,wa2) ! in :fishpack:fftpack.f
+            integer, optional,check(shape(cc, 0) == ido),depend(cc) :: ido=shape(cc, 0)
+            integer, optional,check(shape(cc, 2) == l1),depend(cc) :: l1=shape(cc, 2)
+            real dimension(ido,3,l1) :: cc
+            real dimension(ido,l1,3),depend(l1,ido) :: ch
+            real dimension(*) :: wa1
+            real dimension(*) :: wa2
+        end subroutine passb3
+        subroutine passb4(ido,l1,cc,ch,wa1,wa2,wa3) ! in :fishpack:fftpack.f
+            integer, optional,check(shape(cc, 0) == ido),depend(cc) :: ido=shape(cc, 0)
+            integer, optional,check(shape(cc, 2) == l1),depend(cc) :: l1=shape(cc, 2)
+            real dimension(ido,4,l1) :: cc
+            real dimension(ido,l1,4),depend(l1,ido) :: ch
+            real dimension(*) :: wa1
+            real dimension(*) :: wa2
+            real dimension(*) :: wa3
+        end subroutine passb4
+        subroutine passb5(ido,l1,cc,ch,wa1,wa2,wa3,wa4) ! in :fishpack:fftpack.f
+            integer, optional,check(shape(cc, 0) == ido),depend(cc) :: ido=shape(cc, 0)
+            integer, optional,check(shape(cc, 2) == l1),depend(cc) :: l1=shape(cc, 2)
+            real dimension(ido,5,l1) :: cc
+            real dimension(ido,l1,5),depend(l1,ido) :: ch
+            real dimension(*) :: wa1
+            real dimension(*) :: wa2
+            real dimension(*) :: wa3
+            real dimension(*) :: wa4
+        end subroutine passb5
+        subroutine passb(nac,ido,ip,l1,idl1,cc,c1,c2,ch,ch2,wa) ! in :fishpack:fftpack.f
+            integer :: nac
+            integer, optional,check(shape(cc, 0) == ido),depend(cc) :: ido=shape(cc, 0)
+            integer, optional,check(shape(cc, 1) == ip),depend(cc) :: ip=shape(cc, 1)
+            integer, optional,check(shape(cc, 2) == l1),depend(cc) :: l1=shape(cc, 2)
+            integer, optional,check(shape(c2, 0) == idl1),depend(c2) :: idl1=shape(c2, 0)
+            real dimension(ido,ip,l1) :: cc
+            real dimension(ido,l1,ip),depend(ip,l1,ido) :: c1
+            real dimension(idl1,ip),depend(ip) :: c2
+            real dimension(ido,l1,ip),depend(ip,l1,ido) :: ch
+            real dimension(idl1,ip),depend(ip,idl1) :: ch2
+            real dimension(*) :: wa
+        end subroutine passb
+        subroutine cfftf(n,c,wsave) ! in :fishpack:fftpack.f
+            integer :: n
+            real dimension(*) :: c
+            real dimension(*) :: wsave
+        end subroutine cfftf
+        subroutine cfftf1(n,c,ch,wa,ifac) ! in :fishpack:fftpack.f
+            integer :: n
+            real dimension(*) :: c
+            real dimension(*) :: ch
+            real dimension(*) :: wa
+            integer dimension(*) :: ifac
+        end subroutine cfftf1
+        subroutine passf2(ido,l1,cc,ch,wa1) ! in :fishpack:fftpack.f
+            integer, optional,check(shape(cc, 0) == ido),depend(cc) :: ido=shape(cc, 0)
+            integer, optional,check(shape(cc, 2) == l1),depend(cc) :: l1=shape(cc, 2)
+            real dimension(ido,2,l1) :: cc
+            real dimension(ido,l1,2),depend(l1,ido) :: ch
+            real dimension(*) :: wa1
+        end subroutine passf2
+        subroutine passf3(ido,l1,cc,ch,wa1,wa2) ! in :fishpack:fftpack.f
+            integer, optional,check(shape(cc, 0) == ido),depend(cc) :: ido=shape(cc, 0)
+            integer, optional,check(shape(cc, 2) == l1),depend(cc) :: l1=shape(cc, 2)
+            real dimension(ido,3,l1) :: cc
+            real dimension(ido,l1,3),depend(l1,ido) :: ch
+            real dimension(*) :: wa1
+            real dimension(*) :: wa2
+        end subroutine passf3
+        subroutine passf4(ido,l1,cc,ch,wa1,wa2,wa3) ! in :fishpack:fftpack.f
+            integer, optional,check(shape(cc, 0) == ido),depend(cc) :: ido=shape(cc, 0)
+            integer, optional,check(shape(cc, 2) == l1),depend(cc) :: l1=shape(cc, 2)
+            real dimension(ido,4,l1) :: cc
+            real dimension(ido,l1,4),depend(l1,ido) :: ch
+            real dimension(*) :: wa1
+            real dimension(*) :: wa2
+            real dimension(*) :: wa3
+        end subroutine passf4
+        subroutine passf5(ido,l1,cc,ch,wa1,wa2,wa3,wa4) ! in :fishpack:fftpack.f
+            integer, optional,check(shape(cc, 0) == ido),depend(cc) :: ido=shape(cc, 0)
+            integer, optional,check(shape(cc, 2) == l1),depend(cc) :: l1=shape(cc, 2)
+            real dimension(ido,5,l1) :: cc
+            real dimension(ido,l1,5),depend(l1,ido) :: ch
+            real dimension(*) :: wa1
+            real dimension(*) :: wa2
+            real dimension(*) :: wa3
+            real dimension(*) :: wa4
+        end subroutine passf5
+        subroutine passf(nac,ido,ip,l1,idl1,cc,c1,c2,ch,ch2,wa) ! in :fishpack:fftpack.f
+            integer :: nac
+            integer, optional,check(shape(cc, 0) == ido),depend(cc) :: ido=shape(cc, 0)
+            integer, optional,check(shape(cc, 1) == ip),depend(cc) :: ip=shape(cc, 1)
+            integer, optional,check(shape(cc, 2) == l1),depend(cc) :: l1=shape(cc, 2)
+            integer, optional,check(shape(c2, 0) == idl1),depend(c2) :: idl1=shape(c2, 0)
+            real dimension(ido,ip,l1) :: cc
+            real dimension(ido,l1,ip),depend(ip,l1,ido) :: c1
+            real dimension(idl1,ip),depend(ip) :: c2
+            real dimension(ido,l1,ip),depend(ip,l1,ido) :: ch
+            real dimension(idl1,ip),depend(ip,idl1) :: ch2
+            real dimension(*) :: wa
+        end subroutine passf
+        subroutine rffti(n,wsave) ! in :fishpack:fftpack.f
+            integer :: n
+            real dimension(*) :: wsave
+        end subroutine rffti
+        subroutine rffti1(n,wa,ifac) ! in :fishpack:fftpack.f
+            integer :: n
+            real dimension(*) :: wa
+            integer dimension(*) :: ifac
+        end subroutine rffti1
+        subroutine rfftb(n,r,wsave) ! in :fishpack:fftpack.f
+            integer :: n
+            real dimension(*) :: r
+            real dimension(*) :: wsave
+        end subroutine rfftb
+        subroutine rfftb1(n,c,ch,wa,ifac) ! in :fishpack:fftpack.f
+            integer :: n
+            real dimension(*) :: c
+            real dimension(*) :: ch
+            real dimension(*) :: wa
+            integer dimension(*) :: ifac
+        end subroutine rfftb1
+        subroutine radb2(ido,l1,cc,ch,wa1) ! in :fishpack:fftpack.f
+            integer, optional,check(shape(cc, 0) == ido),depend(cc) :: ido=shape(cc, 0)
+            integer, optional,check(shape(cc, 2) == l1),depend(cc) :: l1=shape(cc, 2)
+            real dimension(ido,2,l1) :: cc
+            real dimension(ido,l1,2),depend(l1,ido) :: ch
+            real dimension(*) :: wa1
+        end subroutine radb2
+        subroutine radb3(ido,l1,cc,ch,wa1,wa2) ! in :fishpack:fftpack.f
+            integer, optional,check(shape(cc, 0) == ido),depend(cc) :: ido=shape(cc, 0)
+            integer, optional,check(shape(cc, 2) == l1),depend(cc) :: l1=shape(cc, 2)
+            real dimension(ido,3,l1) :: cc
+            real dimension(ido,l1,3),depend(l1,ido) :: ch
+            real dimension(*) :: wa1
+            real dimension(*) :: wa2
+        end subroutine radb3
+        subroutine radb4(ido,l1,cc,ch,wa1,wa2,wa3) ! in :fishpack:fftpack.f
+            integer, optional,check(shape(cc, 0) == ido),depend(cc) :: ido=shape(cc, 0)
+            integer, optional,check(shape(cc, 2) == l1),depend(cc) :: l1=shape(cc, 2)
+            real dimension(ido,4,l1) :: cc
+            real dimension(ido,l1,4),depend(l1,ido) :: ch
+            real dimension(*) :: wa1
+            real dimension(*) :: wa2
+            real dimension(*) :: wa3
+        end subroutine radb4
+        subroutine radb5(ido,l1,cc,ch,wa1,wa2,wa3,wa4) ! in :fishpack:fftpack.f
+            integer, optional,check(shape(cc, 0) == ido),depend(cc) :: ido=shape(cc, 0)
+            integer, optional,check(shape(cc, 2) == l1),depend(cc) :: l1=shape(cc, 2)
+            real dimension(ido,5,l1) :: cc
+            real dimension(ido,l1,5),depend(l1,ido) :: ch
+            real dimension(*) :: wa1
+            real dimension(*) :: wa2
+            real dimension(*) :: wa3
+            real dimension(*) :: wa4
+        end subroutine radb5
+        subroutine radbg(ido,ip,l1,idl1,cc,c1,c2,ch,ch2,wa) ! in :fishpack:fftpack.f
+            integer, optional,check(shape(cc, 0) == ido),depend(cc) :: ido=shape(cc, 0)
+            integer, optional,check(shape(cc, 1) == ip),depend(cc) :: ip=shape(cc, 1)
+            integer, optional,check(shape(cc, 2) == l1),depend(cc) :: l1=shape(cc, 2)
+            integer, optional,check(shape(c2, 0) == idl1),depend(c2) :: idl1=shape(c2, 0)
+            real dimension(ido,ip,l1) :: cc
+            real dimension(ido,l1,ip),depend(ip,l1,ido) :: c1
+            real dimension(idl1,ip),depend(ip) :: c2
+            real dimension(ido,l1,ip),depend(ip,l1,ido) :: ch
+            real dimension(idl1,ip),depend(ip,idl1) :: ch2
+            real dimension(*) :: wa
+        end subroutine radbg
+        subroutine rfftf(n,r,wsave) ! in :fishpack:fftpack.f
+            integer :: n
+            real dimension(*) :: r
+            real dimension(*) :: wsave
+        end subroutine rfftf
+        subroutine rfftf1(n,c,ch,wa,ifac) ! in :fishpack:fftpack.f
+            integer :: n
+            real dimension(*) :: c
+            real dimension(*) :: ch
+            real dimension(*) :: wa
+            integer dimension(*) :: ifac
+        end subroutine rfftf1
+        subroutine radf2(ido,l1,cc,ch,wa1) ! in :fishpack:fftpack.f
+            integer, optional,check(shape(cc, 0) == ido),depend(cc) :: ido=shape(cc, 0)
+            integer, optional,check(shape(cc, 1) == l1),depend(cc) :: l1=shape(cc, 1)
+            real dimension(ido,l1,2) :: cc
+            real dimension(ido,2,l1),depend(l1,ido) :: ch
+            real dimension(*) :: wa1
+        end subroutine radf2
+        subroutine radf3(ido,l1,cc,ch,wa1,wa2) ! in :fishpack:fftpack.f
+            integer, optional,check(shape(cc, 0) == ido),depend(cc) :: ido=shape(cc, 0)
+            integer, optional,check(shape(cc, 1) == l1),depend(cc) :: l1=shape(cc, 1)
+            real dimension(ido,l1,3) :: cc
+            real dimension(ido,3,l1),depend(l1,ido) :: ch
+            real dimension(*) :: wa1
+            real dimension(*) :: wa2
+        end subroutine radf3
+        subroutine radf4(ido,l1,cc,ch,wa1,wa2,wa3) ! in :fishpack:fftpack.f
+            integer, optional,check(shape(cc, 0) == ido),depend(cc) :: ido=shape(cc, 0)
+            integer, optional,check(shape(cc, 1) == l1),depend(cc) :: l1=shape(cc, 1)
+            real dimension(ido,l1,4) :: cc
+            real dimension(ido,4,l1),depend(l1,ido) :: ch
+            real dimension(*) :: wa1
+            real dimension(*) :: wa2
+            real dimension(*) :: wa3
+        end subroutine radf4
+        subroutine radf5(ido,l1,cc,ch,wa1,wa2,wa3,wa4) ! in :fishpack:fftpack.f
+            integer, optional,check(shape(cc, 0) == ido),depend(cc) :: ido=shape(cc, 0)
+            integer, optional,check(shape(cc, 1) == l1),depend(cc) :: l1=shape(cc, 1)
+            real dimension(ido,l1,5) :: cc
+            real dimension(ido,5,l1),depend(l1,ido) :: ch
+            real dimension(*) :: wa1
+            real dimension(*) :: wa2
+            real dimension(*) :: wa3
+            real dimension(*) :: wa4
+        end subroutine radf5
+        subroutine radfg(ido,ip,l1,idl1,cc,c1,c2,ch,ch2,wa) ! in :fishpack:fftpack.f
+            integer, optional,check(shape(cc, 0) == ido),depend(cc) :: ido=shape(cc, 0)
+            integer, optional,check(shape(cc, 1) == ip),depend(cc) :: ip=shape(cc, 1)
+            integer, optional,check(shape(cc, 2) == l1),depend(cc) :: l1=shape(cc, 2)
+            integer, optional,check(shape(c2, 0) == idl1),depend(c2) :: idl1=shape(c2, 0)
+            real dimension(ido,ip,l1) :: cc
+            real dimension(ido,l1,ip),depend(ip,l1,ido) :: c1
+            real dimension(idl1,ip),depend(ip) :: c2
+            real dimension(ido,l1,ip),depend(ip,l1,ido) :: ch
+            real dimension(idl1,ip),depend(ip,idl1) :: ch2
+            real dimension(*) :: wa
+        end subroutine radfg
+        function pimach(dum) ! in :fishpack:fftpack.f
+            real :: dum
+            real :: pimach
+        end function pimach
+        subroutine genbun(nperod,n,mperod,m,a,b,c,idimy,y,ierror,w) ! in :fishpack:genbun.f
+            integer :: nperod
+            integer :: n
+            integer :: mperod
+            integer :: m
+            real dimension(*) :: a
+            real dimension(*) :: b
+            real dimension(*) :: c
+            integer, optional,check(shape(y, 0) == idimy),depend(y) :: idimy=shape(y, 0)
+            real dimension(idimy,1) :: y
+            integer :: ierror
+            real dimension(*) :: w
+        end subroutine genbun
+        subroutine poisd2(mr,nr,istag,ba,bb,bc,q,idimq,b,w,d,tcos,p) ! in :fishpack:genbun.f
+            integer :: mr
+            integer :: nr
+            integer :: istag
+            real dimension(*) :: ba
+            real dimension(*) :: bb
+            real dimension(*) :: bc
+            real dimension(idimq,1) :: q
+            integer, optional,check(shape(q, 0) == idimq),depend(q) :: idimq=shape(q, 0)
+            real dimension(*) :: b
+            real dimension(*) :: w
+            real dimension(*) :: d
+            real dimension(*) :: tcos
+            real dimension(*) :: p
+        end subroutine poisd2
+        subroutine poisn2(m,n,istag,mixbnd,a,bb,c,q,idimq,b,b2,b3,w,w2,w3,d,tcos,p) ! in :fishpack:genbun.f
+            integer :: m
+            integer :: n
+            integer :: istag
+            integer :: mixbnd
+            real dimension(*) :: a
+            real dimension(*) :: bb
+            real dimension(*) :: c
+            real dimension(idimq,*) :: q
+            integer, optional,check(shape(q, 0) == idimq),depend(q) :: idimq=shape(q, 0)
+            real dimension(*) :: b
+            real dimension(*) :: b2
+            real dimension(*) :: b3
+            real dimension(*) :: w
+            real dimension(*) :: w2
+            real dimension(*) :: w3
+            real dimension(*) :: d
+            real dimension(*) :: tcos
+            real dimension(*) :: p
+        end subroutine poisn2
+        subroutine poisp2(m,n,a,bb,c,q,idimq,b,b2,b3,w,w2,w3,d,tcos,p) ! in :fishpack:genbun.f
+            integer :: m
+            integer :: n
+            real dimension(*) :: a
+            real dimension(*) :: bb
+            real dimension(*) :: c
+            real dimension(idimq,1) :: q
+            integer, optional,check(shape(q, 0) == idimq),depend(q) :: idimq=shape(q, 0)
+            real dimension(*) :: b
+            real dimension(*) :: b2
+            real dimension(*) :: b3
+            real dimension(*) :: w
+            real dimension(*) :: w2
+            real dimension(*) :: w3
+            real dimension(*) :: d
+            real dimension(*) :: tcos
+            real dimension(*) :: p
+        end subroutine poisp2
+        subroutine cosgen(n,ijump,fnum,fden,a) ! in :fishpack:gnbnaux.f
+            integer :: n
+            integer :: ijump
+            real :: fnum
+            real :: fden
+            real dimension(*) :: a
+        end subroutine cosgen
+        subroutine merge(tcos,i1,m1,i2,m2,i3) ! in :fishpack:gnbnaux.f
+            real dimension(*) :: tcos
+            integer :: i1
+            integer :: m1
+            integer :: i2
+            integer :: m2
+            integer :: i3
+        end subroutine merge
+        subroutine trix(idegbr,idegcr,m,a,b,c,y,tcos,d,w) ! in :fishpack:gnbnaux.f
+            integer :: idegbr
+            integer :: idegcr
+            integer :: m
+            real dimension(*) :: a
+            real dimension(*) :: b
+            real dimension(*) :: c
+            real dimension(*) :: y
+            real dimension(*) :: tcos
+            real dimension(*) :: d
+            real dimension(*) :: w
+        end subroutine trix
+        subroutine tri3(m,a,b,c,k,y1,y2,y3,tcos,d,w1,w2,w3) ! in :fishpack:gnbnaux.f
+            integer :: m
+            real dimension(*) :: a
+            real dimension(*) :: b
+            real dimension(*) :: c
+            integer dimension(4) :: k
+            real dimension(*) :: y1
+            real dimension(*) :: y2
+            real dimension(*) :: y3
+            real dimension(*) :: tcos
+            real dimension(*) :: d
+            real dimension(*) :: w1
+            real dimension(*) :: w2
+            real dimension(*) :: w3
+        end subroutine tri3
+        subroutine hstcrt(a,b,m,mbdcnd,bda,bdb,c,d,n,nbdcnd,bdc,bdd,elmbda,f,idimf,pertrb,ierror,w) ! in :fishpack:hstcrt.f
+            real :: a
+            real :: b
+            integer :: m
+            integer :: mbdcnd
+            real dimension(*) :: bda
+            real dimension(*) :: bdb
+            real :: c
+            real :: d
+            integer :: n
+            integer :: nbdcnd
+            real dimension(*) :: bdc
+            real dimension(*) :: bdd
+            real :: elmbda
+            real dimension(idimf,1) :: f
+            integer, optional,check(shape(f, 0) == idimf),depend(f) :: idimf=shape(f, 0)
+            real :: pertrb
+            integer :: ierror
+            real dimension(*) :: w
+        end subroutine hstcrt
+        subroutine hstcsp(intl,a,b,m,mbdcnd,bda,bdb,c,d,n,nbdcnd,bdc,bdd,elmbda,f,idimf,pertrb,ierror,w) ! in :fishpack:hstcsp.f
+            integer :: intl
+            real :: a
+            real :: b
+            integer :: m
+            integer :: mbdcnd
+            real dimension(*) :: bda
+            real dimension(*) :: bdb
+            real :: c
+            real :: d
+            integer :: n
+            integer :: nbdcnd
+            real dimension(*) :: bdc
+            real dimension(*) :: bdd
+            real :: elmbda
+            real dimension(idimf,1) :: f
+            integer, optional,check(shape(f, 0) == idimf),depend(f) :: idimf=shape(f, 0)
+            real :: pertrb
+            integer :: ierror
+            real dimension(*) :: w
+        end subroutine hstcsp
+        subroutine hstcs1(intl,a,b,m,mbdcnd,bda,bdb,c,d,n,nbdcnd,bdc,bdd,elmbda,f,idimf,pertrb,ierr1,am,bm,cm,an,bn,cn,snth,rsq,wrk) ! in :fishpack:hstcsp.f
+            integer :: intl
+            real :: a
+            real :: b
+            integer :: m
+            integer :: mbdcnd
+            real dimension(*) :: bda
+            real dimension(*) :: bdb
+            real :: c
+            real :: d
+            integer :: n
+            integer :: nbdcnd
+            real dimension(*) :: bdc
+            real dimension(*) :: bdd
+            real :: elmbda
+            real dimension(idimf,1) :: f
+            integer, optional,check(shape(f, 0) == idimf),depend(f) :: idimf=shape(f, 0)
+            real :: pertrb
+            integer :: ierr1
+            real dimension(*) :: am
+            real dimension(*) :: bm
+            real dimension(*) :: cm
+            real dimension(*) :: an
+            real dimension(*) :: bn
+            real dimension(*) :: cn
+            real dimension(*) :: snth
+            real dimension(*) :: rsq
+            real dimension(*) :: wrk
+        end subroutine hstcs1
+        subroutine hstcyl(a,b,m,mbdcnd,bda,bdb,c,d,n,nbdcnd,bdc,bdd,elmbda,f,idimf,pertrb,ierror,w) ! in :fishpack:hstcyl.f
+            real :: a
+            real :: b
+            integer :: m
+            integer :: mbdcnd
+            real dimension(*) :: bda
+            real dimension(*) :: bdb
+            real :: c
+            real :: d
+            integer :: n
+            integer :: nbdcnd
+            real dimension(*) :: bdc
+            real dimension(*) :: bdd
+            real :: elmbda
+            real dimension(idimf,1) :: f
+            integer, optional,check(shape(f, 0) == idimf),depend(f) :: idimf=shape(f, 0)
+            real :: pertrb
+            integer :: ierror
+            real dimension(*) :: w
+        end subroutine hstcyl
+        subroutine hstplr(a,b,m,mbdcnd,bda,bdb,c,d,n,nbdcnd,bdc,bdd,elmbda,f,idimf,pertrb,ierror,w) ! in :fishpack:hstplr.f
+            real :: a
+            real :: b
+            integer :: m
+            integer :: mbdcnd
+            real dimension(*) :: bda
+            real dimension(*) :: bdb
+            real :: c
+            real :: d
+            integer :: n
+            integer :: nbdcnd
+            real dimension(*) :: bdc
+            real dimension(*) :: bdd
+            real :: elmbda
+            real dimension(idimf,1) :: f
+            integer, optional,check(shape(f, 0) == idimf),depend(f) :: idimf=shape(f, 0)
+            real :: pertrb
+            integer :: ierror
+            real dimension(*) :: w
+        end subroutine hstplr
+        subroutine hstssp(a,b,m,mbdcnd,bda,bdb,c,d,n,nbdcnd,bdc,bdd,elmbda,f,idimf,pertrb,ierror,w) ! in :fishpack:hstssp.f
+            real :: a
+            real :: b
+            integer :: m
+            integer :: mbdcnd
+            real dimension(*) :: bda
+            real dimension(*) :: bdb
+            real :: c
+            real :: d
+            integer :: n
+            integer :: nbdcnd
+            real dimension(*) :: bdc
+            real dimension(*) :: bdd
+            real :: elmbda
+            real dimension(idimf,1) :: f
+            integer, optional,check(shape(f, 0) == idimf),depend(f) :: idimf=shape(f, 0)
+            real :: pertrb
+            integer :: ierror
+            real dimension(*) :: w
+        end subroutine hstssp
+        subroutine hw3crt(xs,xf,l,lbdcnd,bdxs,bdxf,ys,yf,m,mbdcnd,bdys,bdyf,zs,zf,n,nbdcnd,bdzs,bdzf,elmbda,ldimf,mdimf,f,pertrb,ierror,w) ! in :fishpack:hw3crt.f
+            real :: xs
+            real :: xf
+            integer :: l
+            integer :: lbdcnd
+            real dimension(mdimf,*) :: bdxs
+            real dimension(mdimf,*),depend(mdimf) :: bdxf
+            real :: ys
+            real :: yf
+            integer :: m
+            integer :: mbdcnd
+            real dimension(ldimf,*) :: bdys
+            real dimension(ldimf,*),depend(ldimf) :: bdyf
+            real :: zs
+            real :: zf
+            integer :: n
+            integer :: nbdcnd
+            real dimension(ldimf,*),depend(ldimf) :: bdzs
+            real dimension(ldimf,*),depend(ldimf) :: bdzf
+            real :: elmbda
+            integer, optional,check(shape(bdys, 0) == ldimf),depend(bdys) :: ldimf=shape(bdys, 0)
+            integer, optional,check(shape(bdxs, 0) == mdimf),depend(bdxs) :: mdimf=shape(bdxs, 0)
+            real dimension(ldimf,mdimf,*),depend(ldimf,mdimf) :: f
+            real :: pertrb
+            integer :: ierror
+            real dimension(*) :: w
+        end subroutine hw3crt
+        subroutine hwscrt(a,b,m,mbdcnd,bda,bdb,c,d,n,nbdcnd,bdc,bdd,elmbda,f,idimf,pertrb,ierror,w) ! in :fishpack:hwscrt.f
+            real :: a
+            real :: b
+            integer :: m
+            integer :: mbdcnd
+            real dimension(*) :: bda
+            real dimension(*) :: bdb
+            real :: c
+            real :: d
+            integer :: n
+            integer :: nbdcnd
+            real dimension(*) :: bdc
+            real dimension(*) :: bdd
+            real :: elmbda
+            real dimension(idimf,*) :: f
+            integer, optional,check(shape(f, 0) == idimf),depend(f) :: idimf=shape(f, 0)
+            real :: pertrb
+            integer :: ierror
+            real dimension(*) :: w
+        end subroutine hwscrt
+        subroutine hwscsp(intl,ts,tf,m,mbdcnd,bdts,bdtf,rs,rf,n,nbdcnd,bdrs,bdrf,elmbda,f,idimf,pertrb,ierror,w) ! in :fishpack:hwscsp.f
+            integer :: intl
+            real :: ts
+            real :: tf
+            integer :: m
+            integer :: mbdcnd
+            real dimension(*) :: bdts
+            real dimension(*) :: bdtf
+            real :: rs
+            real :: rf
+            integer :: n
+            integer :: nbdcnd
+            real dimension(*) :: bdrs
+            real dimension(*) :: bdrf
+            real :: elmbda
+            real dimension(idimf,1) :: f
+            integer, optional,check(shape(f, 0) == idimf),depend(f) :: idimf=shape(f, 0)
+            real :: pertrb
+            integer :: ierror
+            real dimension(*) :: w
+        end subroutine hwscsp
+        subroutine hwscs1(intl,ts,tf,m,mbdcnd,bdts,bdtf,rs,rf,n,nbdcnd,bdrs,bdrf,elmbda,f,idimf,pertrb,w,s,an,bn,cn,r,am,bm,cm,sint,bmh) ! in :fishpack:hwscsp.f
+            integer :: intl
+            real :: ts
+            real :: tf
+            integer :: m
+            integer :: mbdcnd
+            real dimension(*) :: bdts
+            real dimension(*) :: bdtf
+            real :: rs
+            real :: rf
+            integer :: n
+            integer :: nbdcnd
+            real dimension(*) :: bdrs
+            real dimension(*) :: bdrf
+            real :: elmbda
+            real dimension(idimf,*) :: f
+            integer, optional,check(shape(f, 0) == idimf),depend(f) :: idimf=shape(f, 0)
+            real :: pertrb
+            real dimension(*) :: w
+            real dimension(*) :: s
+            real dimension(*) :: an
+            real dimension(*) :: bn
+            real dimension(*) :: cn
+            real dimension(*) :: r
+            real dimension(*) :: am
+            real dimension(*) :: bm
+            real dimension(*) :: cm
+            real dimension(*) :: sint
+            real dimension(*) :: bmh
+        end subroutine hwscs1
+        subroutine hwscyl(a,b,m,mbdcnd,bda,bdb,c,d,n,nbdcnd,bdc,bdd,elmbda,f,idimf,pertrb,ierror,w) ! in :fishpack:hwscyl.f
+            real :: a
+            real :: b
+            integer :: m
+            integer :: mbdcnd
+            real dimension(*) :: bda
+            real dimension(*) :: bdb
+            real :: c
+            real :: d
+            integer :: n
+            integer :: nbdcnd
+            real dimension(*) :: bdc
+            real dimension(*) :: bdd
+            real :: elmbda
+            real dimension(idimf,*) :: f
+            integer, optional,check(shape(f, 0) == idimf),depend(f) :: idimf=shape(f, 0)
+            real :: pertrb
+            integer :: ierror
+            real dimension(*) :: w
+        end subroutine hwscyl
+        subroutine hwsplr(a,b,m,mbdcnd,bda,bdb,c,d,n,nbdcnd,bdc,bdd,elmbda,f,idimf,pertrb,ierror,w) ! in :fishpack:hwsplr.f
+            real :: a
+            real :: b
+            integer :: m
+            integer :: mbdcnd
+            real dimension(*) :: bda
+            real dimension(*) :: bdb
+            real :: c
+            real :: d
+            integer :: n
+            integer :: nbdcnd
+            real dimension(*) :: bdc
+            real dimension(*) :: bdd
+            real :: elmbda
+            real dimension(idimf,*) :: f
+            integer, optional,check(shape(f, 0) == idimf),depend(f) :: idimf=shape(f, 0)
+            real :: pertrb
+            integer :: ierror
+            real dimension(*) :: w
+        end subroutine hwsplr
+        subroutine hwsssp(ts,tf,m,mbdcnd,bdts,bdtf,ps,pf,n,nbdcnd,bdps,bdpf,elmbda,f,idimf,pertrb,ierror,w) ! in :fishpack:hwsssp.f
+            real :: ts
+            real :: tf
+            integer :: m
+            integer :: mbdcnd
+            real dimension(*) :: bdts
+            real dimension(*) :: bdtf
+            real :: ps
+            real :: pf
+            integer :: n
+            integer :: nbdcnd
+            real dimension(*) :: bdps
+            real dimension(*) :: bdpf
+            real :: elmbda
+            real dimension(idimf,1) :: f
+            integer, optional,check(shape(f, 0) == idimf),depend(f) :: idimf=shape(f, 0)
+            real :: pertrb
+            integer :: ierror
+            real dimension(*) :: w
+        end subroutine hwsssp
+        subroutine hwsss1(ts,tf,m,mbdcnd,bdts,bdtf,ps,pf,n,nbdcnd,bdps,bdpf,elmbda,f,idimf,pertrb,am,bm,cm,sn,ss,sint,d) ! in :fishpack:hwsssp.f
+            real :: ts
+            real :: tf
+            integer :: m
+            integer :: mbdcnd
+            real dimension(*) :: bdts
+            real dimension(*) :: bdtf
+            real :: ps
+            real :: pf
+            integer :: n
+            integer :: nbdcnd
+            real dimension(*) :: bdps
+            real dimension(*) :: bdpf
+            real :: elmbda
+            real dimension(idimf,*) :: f
+            integer, optional,check(shape(f, 0) == idimf),depend(f) :: idimf=shape(f, 0)
+            real :: pertrb
+            real dimension(*) :: am
+            real dimension(*) :: bm
+            real dimension(*) :: cm
+            real dimension(*) :: sn
+            real dimension(*) :: ss
+            real dimension(*) :: sint
+            real dimension(*) :: d
+        end subroutine hwsss1
+        subroutine pois3d(lperod,l,c1,mperod,m,c2,nperod,n,a,b,c,ldimf,mdimf,f,ierror,w) ! in :fishpack:pois3d.f
+            integer :: lperod
+            integer :: l
+            real :: c1
+            integer :: mperod
+            integer :: m
+            real :: c2
+            integer :: nperod
+            integer :: n
+            real dimension(*) :: a
+            real dimension(*) :: b
+            real dimension(*) :: c
+            integer, optional,check(shape(f, 0) == ldimf),depend(f) :: ldimf=shape(f, 0)
+            integer, optional,check(shape(f, 1) == mdimf),depend(f) :: mdimf=shape(f, 1)
+            real dimension(ldimf,mdimf,1) :: f
+            integer :: ierror
+            real dimension(*) :: w
+        end subroutine pois3d
+        subroutine pos3d1(lp,l,mp,m,n,a,b,c,ldimf,mdimf,f,xrt,yrt,t,d,wx,wy,c1,c2,bb) ! in :fishpack:pois3d.f
+            integer :: lp
+            integer :: l
+            integer :: mp
+            integer :: m
+            integer :: n
+            real dimension(*) :: a
+            real dimension(*) :: b
+            real dimension(*) :: c
+            integer, optional,check(shape(f, 0) == ldimf),depend(f) :: ldimf=shape(f, 0)
+            integer, optional,check(shape(f, 1) == mdimf),depend(f) :: mdimf=shape(f, 1)
+            real dimension(ldimf,mdimf,1) :: f
+            real dimension(*) :: xrt
+            real dimension(*) :: yrt
+            real dimension(*) :: t
+            real dimension(*) :: d
+            real dimension(*) :: wx
+            real dimension(*) :: wy
+            real :: c1
+            real :: c2
+            real dimension(*) :: bb
+        end subroutine pos3d1
+        subroutine trid(mr,a,b,c,y,d) ! in :fishpack:pois3d.f
+            integer :: mr
+            real dimension(*) :: a
+            real dimension(*) :: b
+            real dimension(*) :: c
+            real dimension(*) :: y
+            real dimension(*) :: d
+        end subroutine trid
+        subroutine poistg(nperod,n,mperod,m,a,b,c,idimy,y,ierror,w) ! in :fishpack:poistg.f
+            integer :: nperod
+            integer :: n
+            integer :: mperod
+            integer :: m
+            real dimension(*) :: a
+            real dimension(*) :: b
+            real dimension(*) :: c
+            integer, optional,check(shape(y, 0) == idimy),depend(y) :: idimy=shape(y, 0)
+            real dimension(idimy,1) :: y
+            integer :: ierror
+            real dimension(*) :: w
+        end subroutine poistg
+        subroutine postg2(nperod,n,m,a,bb,c,idimq,q,b,b2,b3,w,w2,w3,d,tcos,p) ! in :fishpack:poistg.f
+            integer :: nperod
+            integer :: n
+            integer :: m
+            real dimension(*) :: a
+            real dimension(*) :: bb
+            real dimension(*) :: c
+            integer, optional,check(shape(q, 0) == idimq),depend(q) :: idimq=shape(q, 0)
+            real dimension(idimq,*) :: q
+            real dimension(*) :: b
+            real dimension(*) :: b2
+            real dimension(*) :: b3
+            real dimension(*) :: w
+            real dimension(*) :: w2
+            real dimension(*) :: w3
+            real dimension(*) :: d
+            real dimension(*) :: tcos
+            real dimension(*) :: p
+        end subroutine postg2
+        subroutine seport(usol,idmn,zn,zm,pertrb) ! in :fishpack:sepaux.f
+            real dimension(idmn,1) :: usol
+            integer, optional,check(shape(usol, 0) == idmn),depend(usol) :: idmn=shape(usol, 0)
+            real dimension(*) :: zn
+            real dimension(*) :: zm
+            real :: pertrb
+            integer :: kswx
+            integer :: kswy
+            integer :: k
+            integer :: l
+            real :: ait
+            real :: bit
+            real :: cit
+            real :: dit
+            integer :: mit
+            integer :: nit
+            integer :: is
+            integer :: ms
+            integer :: js
+            integer :: ns
+            real :: dlx
+            real :: dly
+            real :: tdlx3
+            real :: tdly3
+            real :: dlx4
+            real :: dly4
+            common /splp/ kswx,kswy,k,l,ait,bit,cit,dit,mit,nit,is,ms,js,ns,dlx,dly,tdlx3,tdly3,dlx4,dly4
+        end subroutine seport
+        subroutine sepmin(usol,idmn,zn,zm,pertb) ! in :fishpack:sepaux.f
+            real dimension(idmn,1) :: usol
+            integer, optional,check(shape(usol, 0) == idmn),depend(usol) :: idmn=shape(usol, 0)
+            real dimension(*) :: zn
+            real dimension(*) :: zm
+            real :: pertb
+            integer :: kswx
+            integer :: kswy
+            integer :: k
+            integer :: l
+            real :: ait
+            real :: bit
+            real :: cit
+            real :: dit
+            integer :: mit
+            integer :: nit
+            integer :: is
+            integer :: ms
+            integer :: js
+            integer :: ns
+            real :: dlx
+            real :: dly
+            real :: tdlx3
+            real :: tdly3
+            real :: dlx4
+            real :: dly4
+            common /splp/ kswx,kswy,k,l,ait,bit,cit,dit,mit,nit,is,ms,js,ns,dlx,dly,tdlx3,tdly3,dlx4,dly4
+        end subroutine sepmin
+        subroutine septri(n,a,b,c,d,u,z) ! in :fishpack:sepaux.f
+            integer, optional,check(shape(a, 0) == n),depend(a) :: n=shape(a, 0)
+            real dimension(n) :: a
+            real dimension(n),depend(n) :: b
+            real dimension(n),depend(n) :: c
+            real dimension(n),depend(n) :: d
+            real dimension(n),depend(n) :: u
+            real dimension(n),depend(n) :: z
+        end subroutine septri
+        subroutine sepdx(u,idmn,i,j,uxxx,uxxxx) ! in :fishpack:sepaux.f
+            real dimension(idmn,1) :: u
+            integer, optional,check(shape(u, 0) == idmn),depend(u) :: idmn=shape(u, 0)
+            integer :: i
+            integer :: j
+            real :: uxxx
+            real :: uxxxx
+            integer :: kswx
+            integer :: kswy
+            integer :: k
+            integer :: l
+            real :: ait
+            real :: bit
+            real :: cit
+            real :: dit
+            integer :: mit
+            integer :: nit
+            integer :: is
+            integer :: ms
+            integer :: js
+            integer :: ns
+            real :: dlx
+            real :: dly
+            real :: tdlx3
+            real :: tdly3
+            real :: dlx4
+            real :: dly4
+            common /splp/ kswx,kswy,k,l,ait,bit,cit,dit,mit,nit,is,ms,js,ns,dlx,dly,tdlx3,tdly3,dlx4,dly4
+        end subroutine sepdx
+        subroutine sepdy(u,idmn,i,j,uyyy,uyyyy) ! in :fishpack:sepaux.f
+            real dimension(idmn,*) :: u
+            integer, optional,check(shape(u, 0) == idmn),depend(u) :: idmn=shape(u, 0)
+            integer :: i
+            integer :: j
+            real :: uyyy
+            real :: uyyyy
+            integer :: kswx
+            integer :: kswy
+            integer :: k
+            integer :: l
+            real :: ait
+            real :: bit
+            real :: cit
+            real :: dit
+            integer :: mit
+            integer :: nit
+            integer :: is
+            integer :: ms
+            integer :: js
+            integer :: ns
+            real :: dlx
+            real :: dly
+            real :: tdlx3
+            real :: tdly3
+            real :: dlx4
+            real :: dly4
+            common /splp/ kswx,kswy,k,l,ait,bit,cit,dit,mit,nit,is,ms,js,ns,dlx,dly,tdlx3,tdly3,dlx4,dly4
+        end subroutine sepdy
+        subroutine sepeli(intl,iorder,a,b,m,mbdcnd,bda,alpha,bdb,beta,c,d,n,nbdcnd,bdc,gama,bdd,xnu,cofx,cofy,grhs,usol,idmn,w,pertrb,ierror) ! in :fishpack:sepeli.f
+            integer :: intl
+            integer :: iorder
+            real :: a
+            real :: b
+            integer :: m
+            integer :: mbdcnd
+            real dimension(*) :: bda
+            real :: alpha
+            real dimension(*) :: bdb
+            real :: beta
+            real :: c
+            real :: d
+            integer :: n
+            integer :: nbdcnd
+            real dimension(*) :: bdc
+            real :: gama
+            real dimension(*) :: bdd
+            real :: xnu
+            external cofx
+            external cofy
+            real dimension(idmn,1) :: grhs
+            real dimension(idmn,1),depend(idmn) :: usol
+            integer, optional,check(shape(grhs, 0) == idmn),depend(grhs) :: idmn=shape(grhs, 0)
+            real dimension(*) :: w
+            real :: pertrb
+            integer :: ierror
+        end subroutine sepeli
+        subroutine spelip(intl,iorder,a,b,m,mbdcnd,bda,alpha,bdb,beta,c,d,n,nbdcnd,bdc,gama,bdd,xnu,cofx,cofy,an,bn,cn,dn,un,zn,am,bm,cm,dm,um,zm,grhs,usol,idmn,w,pertrb,ierror) ! in :fishpack:sepeli.f
+            use spelip__user__routines
+            integer :: intl
+            integer :: iorder
+            real :: a
+            real :: b
+            integer :: m
+            integer :: mbdcnd
+            real dimension(*) :: bda
+            real :: alpha
+            real dimension(*) :: bdb
+            real :: beta
+            real :: c
+            real :: d
+            integer :: n
+            integer :: nbdcnd
+            real dimension(*) :: bdc
+            real :: gama
+            real dimension(*) :: bdd
+            real :: xnu
+            external cofx
+            external cofy
+            real dimension(*) :: an
+            real dimension(*) :: bn
+            real dimension(*) :: cn
+            real dimension(*) :: dn
+            real dimension(*) :: un
+            real dimension(*) :: zn
+            real dimension(*) :: am
+            real dimension(*) :: bm
+            real dimension(*) :: cm
+            real dimension(*) :: dm
+            real dimension(*) :: um
+            real dimension(*) :: zm
+            real dimension(idmn,1) :: grhs
+            real dimension(idmn,1),depend(idmn) :: usol
+            integer, optional,check(shape(grhs, 0) == idmn),depend(grhs) :: idmn=shape(grhs, 0)
+            real dimension(*) :: w
+            real :: pertrb
+            integer :: ierror
+            integer :: kswx
+            integer :: kswy
+            integer :: k
+            integer :: l
+            real :: ait
+            real :: bit
+            real :: cit
+            real :: dit
+            integer :: mit
+            integer :: nit
+            integer :: is
+            integer :: ms
+            integer :: js
+            integer :: ns
+            real :: dlx
+            real :: dly
+            real :: tdlx3
+            real :: tdly3
+            real :: dlx4
+            real :: dly4
+            common /splp/ kswx,kswy,k,l,ait,bit,cit,dit,mit,nit,is,ms,js,ns,dlx,dly,tdlx3,tdly3,dlx4,dly4
+        end subroutine spelip
+        subroutine chkprm(intl,iorder,a,b,m,mbdcnd,c,d,n,nbdcnd,cofx,cofy,idmn,ierror) ! in :fishpack:sepeli.f
+            use chkprm__user__routines
+            integer :: intl
+            integer :: iorder
+            real :: a
+            real :: b
+            integer :: m
+            integer :: mbdcnd
+            real :: c
+            real :: d
+            integer :: n
+            integer :: nbdcnd
+            external cofx
+            external cofy
+            integer :: idmn
+            integer :: ierror
+        end subroutine chkprm
+        subroutine chksng(mbdcnd,nbdcnd,alpha,beta,gama,xnu,cofx,cofy,singlr) ! in :fishpack:sepeli.f
+            use chksng__user__routines
+            integer :: mbdcnd
+            integer :: nbdcnd
+            real :: alpha
+            real :: beta
+            real :: gama
+            real :: xnu
+            external cofx
+            external cofy
+            logical :: singlr
+            integer :: kswx
+            integer :: kswy
+            integer :: k
+            integer :: l
+            real :: ait
+            real :: bit
+            real :: cit
+            real :: dit
+            integer :: mit
+            integer :: nit
+            integer :: is
+            integer :: ms
+            integer :: js
+            integer :: ns
+            real :: dlx
+            real :: dly
+            real :: tdlx3
+            real :: tdly3
+            real :: dlx4
+            real :: dly4
+            common /splp/ kswx,kswy,k,l,ait,bit,cit,dit,mit,nit,is,ms,js,ns,dlx,dly,tdlx3,tdly3,dlx4,dly4
+        end subroutine chksng
+        subroutine defer(cofx,cofy,idmn,usol,grhs) ! in :fishpack:sepeli.f
+            use defer__user__routines
+            external cofx
+            external cofy
+            integer, optional,check(shape(usol, 0) == idmn),depend(usol) :: idmn=shape(usol, 0)
+            real dimension(idmn,1) :: usol
+            real dimension(idmn,1),depend(idmn) :: grhs
+            integer :: kswx
+            integer :: kswy
+            integer :: k
+            integer :: l
+            real :: ait
+            real :: bit
+            real :: cit
+            real :: dit
+            integer :: mit
+            integer :: nit
+            integer :: is
+            integer :: ms
+            integer :: js
+            integer :: ns
+            real :: dlx
+            real :: dly
+            real :: tdlx3
+            real :: tdly3
+            real :: dlx4
+            real :: dly4
+            common /splp/ kswx,kswy,k,l,ait,bit,cit,dit,mit,nit,is,ms,js,ns,dlx,dly,tdlx3,tdly3,dlx4,dly4
+        end subroutine defer
+        subroutine sepx4(iorder,a,b,m,mbdcnd,bda,alpha,bdb,beta,c,d,n,nbdcnd,bdc,bdd,cofx,grhs,usol,idmn,w,pertrb,ierror) ! in :fishpack:sepx4.f
+            integer :: iorder
+            real :: a
+            real :: b
+            integer :: m
+            integer :: mbdcnd
+            real dimension(*) :: bda
+            real :: alpha
+            real dimension(*) :: bdb
+            real :: beta
+            real :: c
+            real :: d
+            integer :: n
+            integer :: nbdcnd
+            real dimension(*) :: bdc
+            real dimension(*) :: bdd
+            real :: cofx
+            real dimension(idmn,1) :: grhs
+            real dimension(idmn,1),depend(idmn) :: usol
+            integer, optional,check(shape(grhs, 0) == idmn),depend(grhs) :: idmn=shape(grhs, 0)
+            real dimension(*) :: w
+            real :: pertrb
+            integer :: ierror
+        end subroutine sepx4
+        subroutine s4elip(iorder,a,b,m,mbdcnd,bda,alpha,bdb,beta,c,d,n,nbdcnd,bdc,bdd,cofx,an,bn,cn,dn,un,zn,am,bm,cm,dm,um,zm,grhs,usol,idmn,w,pertrb,ierror) ! in :fishpack:sepx4.f
+            use s4elip__user__routines
+            integer :: iorder
+            real :: a
+            real :: b
+            integer :: m
+            integer :: mbdcnd
+            real dimension(*) :: bda
+            real :: alpha
+            real dimension(*) :: bdb
+            real :: beta
+            real :: c
+            real :: d
+            integer :: n
+            integer :: nbdcnd
+            real dimension(*) :: bdc
+            real dimension(*) :: bdd
+            external cofx
+            real dimension(*) :: an
+            real dimension(*) :: bn
+            real dimension(*) :: cn
+            real dimension(*) :: dn
+            real dimension(*) :: un
+            real dimension(*) :: zn
+            real dimension(*) :: am
+            real dimension(*) :: bm
+            real dimension(*) :: cm
+            real dimension(*) :: dm
+            real dimension(*) :: um
+            real dimension(*) :: zm
+            real dimension(idmn,1) :: grhs
+            real dimension(idmn,1),depend(idmn) :: usol
+            integer, optional,check(shape(grhs, 0) == idmn),depend(grhs) :: idmn=shape(grhs, 0)
+            real dimension(*) :: w
+            real :: pertrb
+            integer :: ierror
+            integer :: kswx
+            integer :: kswy
+            integer :: k
+            integer :: l
+            real :: ait
+            real :: bit
+            real :: cit
+            real :: dit
+            integer :: mit
+            integer :: nit
+            integer :: is
+            integer :: ms
+            integer :: js
+            integer :: ns
+            real :: dlx
+            real :: dly
+            real :: tdlx3
+            real :: tdly3
+            real :: dlx4
+            real :: dly4
+            common /splp/ kswx,kswy,k,l,ait,bit,cit,dit,mit,nit,is,ms,js,ns,dlx,dly,tdlx3,tdly3,dlx4,dly4
+        end subroutine s4elip
+        subroutine c4kprm(iorder,a,b,m,mbdcnd,c,d,n,nbdcnd,cofx,idmn,e_ierr_or_er) ! in :fishpack:sepx4.f
+            use c4kprm__user__routines
+            integer :: iorder
+            real :: a
+            real :: b
+            integer :: m
+            integer :: mbdcnd
+            real :: c
+            real :: d
+            integer :: n
+            integer :: nbdcnd
+            external cofx
+            integer :: idmn
+            real :: e_ierr_or_er
+        end subroutine c4kprm
+        subroutine c4ksng(mbdcnd,nbdcnd,alpha,beta,cofx,singlr) ! in :fishpack:sepx4.f
+            use c4ksng__user__routines
+            integer :: mbdcnd
+            integer :: nbdcnd
+            real :: alpha
+            real :: beta
+            external cofx
+            logical :: singlr
+            integer :: kswx
+            integer :: kswy
+            integer :: k
+            integer :: l
+            real :: ait
+            real :: bit
+            real :: cit
+            real :: dit
+            integer :: mit
+            integer :: nit
+            integer :: is
+            integer :: ms
+            integer :: js
+            integer :: ns
+            real :: dlx
+            real :: dly
+            real :: tdlx3
+            real :: tdly3
+            real :: dlx4
+            real :: dly4
+            common /splp/ kswx,kswy,k,l,ait,bit,cit,dit,mit,nit,is,ms,js,ns,dlx,dly,tdlx3,tdly3,dlx4,dly4
+        end subroutine c4ksng
+        subroutine d4fer(cofx,idmn,usol,grhs) ! in :fishpack:sepx4.f
+            use d4fer__user__routines
+            external cofx
+            integer, optional,check(shape(usol, 0) == idmn),depend(usol) :: idmn=shape(usol, 0)
+            real dimension(idmn,1) :: usol
+            real dimension(idmn,1),depend(idmn) :: grhs
+            integer :: kswx
+            integer :: kswy
+            integer :: k
+            integer :: l
+            real :: ait
+            real :: bit
+            real :: cit
+            real :: dit
+            integer :: mit
+            integer :: nit
+            integer :: is
+            integer :: ms
+            integer :: js
+            integer :: ns
+            real :: dlx
+            real :: dly
+            real :: tdlx3
+            real :: tdly3
+            real :: dlx4
+            real :: dly4
+            common /splp/ kswx,kswy,k,l,ait,bit,cit,dit,mit,nit,is,ms,js,ns,dlx,dly,tdlx3,tdly3,dlx4,dly4
+        end subroutine d4fer
+    end interface 
+end python module fishpack
+
+! This file was auto-generated with f2py (version:2.3.2).
+! See:
+! https://web.archive.org/web/20140822061353/http://cens.ioc.ee/projects/f2py2e

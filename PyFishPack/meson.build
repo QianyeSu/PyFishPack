@@ -219,9 +219,9 @@ else:
     # Generate f2py interface files
     fishpack_sources = []
     fishpack_source = custom_target(
-        'fishpack_coremodule.c',
-        input: ['src/fishpack_core.pyf'],
-        output: ['fishpack_coremodule.c', 'fishpack_core-f2pywrappers.f'],
+        'fishpackmodule.c',
+        input: ['src/fishpack.pyf'],
+        output: ['fishpackmodule.c', 'fishpack-f2pywrappers.f'],
         command: [
             py,
             '-m', 'numpy.f2py',
