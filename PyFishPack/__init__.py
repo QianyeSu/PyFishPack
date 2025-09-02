@@ -5,7 +5,7 @@ FISHPACK is a collection of Fortran routines for solving separable
 elliptic partial differential equations.
 """
 
-__version__ = "1.0.0"
+__version__ = "0.1.0"
 
 try:
     # Import the compiled fishpack extension
