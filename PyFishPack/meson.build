@@ -1,377 +1,212 @@
-# PyFishPack - FISHPACK library Python wrapper with cross-platform optimization
-project('pyfishpack', 'c', 'fortran',
-  version : '1.0.0',
-  default_options : ['warning_level=2', 'buildtype=release', 'b_lto=true'])
+# PyFishPack - Python extension backed by modern Fortran and a C wrapper.
+project(
+    'pyfishpack',
+    'c',
+    'fortran',
+    version: '1.0.0',
+    default_options: ['warning_level=2', 'buildtype=release', 'b_lto=true'],
+)
 
-# Get Python installation
 py_mod = import('python')
-py = py_mod.find_installation('python', pure: false)
+py = py_mod.find_installation(pure: false)
 py_dep = py.dependency()
+build_py = find_program('build_python', required: false)
+if not build_py.found()
+    build_py = py
+endif
 
-# Find OpenMP dependency
-openmp_dep = dependency('openmp', required: false)
-
-# Install Python module files
 py.install_sources(
-    ['__init__.py'],
+    ['__init__.py', 'apps.py'],
     subdir: 'PyFishPack',
 )
 
-# Get numpy include directories with robust fallbacks
 incdir_numpy_cmd = run_command(
-    py,
+    build_py,
     ['-c', '''
 import numpy
 import os
-# Try multiple potential paths
+
 paths = [
     numpy.get_include(),
     os.path.join(numpy.__path__[0], "core", "include"),
-    os.path.join(numpy.__path__[0], "_core", "include")
+    os.path.join(numpy.__path__[0], "_core", "include"),
 ]
 for path in paths:
     if os.path.exists(os.path.join(path, "numpy", "npy_os.h")):
         print(path)
         break
 else:
-    print(numpy.get_include())  # fallback
-'''],
-    check: true,
-)
-incdir_numpy = incdir_numpy_cmd.stdout().strip()
-
-# Try to get f2py include, with multiple fallbacks
-incdir_f2py_cmd = run_command(
-    py,
-    ['-c', '''
-import numpy
-import os
-try:
-    import numpy.f2py
-    f2py_path = numpy.f2py.get_include()
-    if os.path.exists(f2py_path):
-        print(f2py_path)
-    else:
-        print(numpy.get_include())
-except:
     print(numpy.get_include())
 '''],
     check: true,
 )
-incdir_f2py = incdir_f2py_cmd.stdout().strip()
-
+incdir_numpy = incdir_numpy_cmd.stdout().strip()
 message('NumPy include directory: ' + incdir_numpy)
-message('F2PY include directory: ' + incdir_f2py)
 
-# Detect platform and architecture for optimization flags
 host_system = host_machine.system()
 host_cpu = host_machine.cpu_family()
-
 message('Host system: ' + host_system)
 message('Host CPU family: ' + host_cpu)
 
-# Cross-platform optimization flags based on setup.py configuration
-fortran_args = []
-c_args = []
+fortran_compiler = meson.get_compiler('fortran')
+c_compiler = meson.get_compiler('c')
+is_gcc_toolchain = fortran_compiler.get_id() == 'gcc' and c_compiler.get_id() == 'gcc'
+
+openmp_dependencies = []
+openmp_fortran_args = []
+openmp_c_args = []
+openmp_link_args = []
+if is_gcc_toolchain
+    openmp_dep = dependency('openmp', required: false)
+    if openmp_dep.found()
+        openmp_dependencies += openmp_dep
+        openmp_fortran_args += ['-fopenmp']
+        openmp_c_args += ['-fopenmp']
+        openmp_link_args += ['-fopenmp']
+        message('Using OpenMP dependency for parallel processing')
+    endif
+elif host_system != 'windows'
+    openmp_dep = dependency('openmp', required: false)
+    if openmp_dep.found()
+        openmp_dependencies += openmp_dep
+        message('Using OpenMP dependency for parallel processing')
+    endif
+endif
+
+fortran_args = [
+    '-O3',
+    '-fPIC',
+    '-funroll-loops',
+    '-finline-functions',
+    '-ftree-vectorize',
+    '-ffinite-math-only',
+    '-ffree-line-length-none',
+    '-fno-common',
+    '-ftree-loop-im',
+    '-ftree-loop-distribution',
+    '-falign-functions=32',
+    '-falign-loops=32',
+    '-fimplicit-none',
+]
+
+c_args = [
+    '-DNPY_NO_DEPRECATED_API=NPY_1_20_API_VERSION',
+    '-fPIC',
+    '-fno-trapping-math',
+    '-falign-functions=32',
+]
 
 if host_system == 'darwin' and host_cpu == 'aarch64'
-    # Apple Silicon (arm64) optimized flags
     message('Configuring for Apple Silicon (arm64)')
-    fortran_args = [
-        '-O3',                      # Maximum optimization
-        '-fPIC',                    # Position independent code
-        '-fno-second-underscore',   # Fortran symbol naming convention
-        '-funroll-loops',           # Loop unrolling optimization
-        '-finline-functions',       # Inline small functions
-        '-ftree-vectorize',         # Auto-vectorization for SIMD
-        '-ffinite-math-only',       # Assume no NaN/Inf values
-        '-ffree-line-length-none',  # Allow arbitrarily long free-form source lines
-        '-march=armv8-a',           # ARM64 architecture
-        '-mtune=apple-m1',          # Tune for Apple Silicon
-        '-fno-common',              # Don't use common blocks
-        '-ftree-loop-im',           # Loop invariant motion
-        '-ftree-loop-distribution', # Loop distribution
-        '-falign-functions=32',     # Function alignment
-        '-falign-loops=32',         # Loop alignment optimization
-        '-std=legacy',              # Legacy Fortran standard
-    ]
-    c_args = [
-        '-DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION', # NumPy API compatibility
-        '-march=armv8-a',                             # ARM64 architecture
-        '-mtune=apple-m1',                            # Tune for Apple Silicon
-        '-fPIC',                                      # Position independent code
-        '-fno-trapping-math',                         # Disable floating-point traps
-        '-falign-functions=32',                       # Function alignment
-    ]
+    fortran_args += ['-march=armv8-a', '-mtune=apple-m1']
+    c_args += ['-march=armv8-a', '-mtune=apple-m1']
 else
-    # x86-64 optimized flags (Linux/Windows/Intel macOS)
     message('Configuring for x86-64 architecture')
-    fortran_args = [
-        '-O3',                      # Maximum optimization
-        '-fPIC',                    # Position independent code
-        '-fno-second-underscore',   # Fortran symbol naming convention
-        '-funroll-loops',           # Loop unrolling optimization
-        '-finline-functions',       # Inline small functions
-        '-ftree-vectorize',         # Auto-vectorization for SIMD
-        '-ffinite-math-only',       # Assume no NaN/Inf values
-        '-ffree-line-length-none',  # Allow arbitrarily long free-form source lines
-        '-march=x86-64',            # x86-64 architecture
-        '-mtune=generic',           # Generic tuning (portable)
-        '-fno-common',              # Don't use common blocks
-        '-ftree-loop-im',           # Loop invariant motion
-        '-ftree-loop-distribution', # Loop distribution
-        '-falign-functions=32',     # Function alignment
-        '-falign-loops=32',         # Loop alignment optimization
-        '-std=legacy',              # Legacy Fortran standard
-    ]
-    c_args = [
-        '-DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION',# NumPy API compatibility
-        '-march=x86-64',                              # x86-64 architecture
-        '-mtune=generic',                             # Generic tuning (portable)
-        '-fPIC',                                      # Position independent code
-        '-fno-trapping-math',                         # Disable floating-point traps
-        '-falign-functions=32',                       # Function alignment
-    ]
+    fortran_args += ['-march=x86-64', '-mtune=generic']
+    c_args += ['-march=x86-64', '-mtune=generic', '-O3', '-funroll-loops', '-finline-functions', '-ftree-vectorize']
 endif
 
-# Add OpenMP if available
-if openmp_dep.found()
-    fortran_args += ['-fopenmp']
-    c_args += ['-fopenmp']
-endif
+fortran_args += openmp_fortran_args
+c_args += openmp_c_args
 
 message('Fortran args: ' + ' '.join(fortran_args))
 message('C args: ' + ' '.join(c_args))
 
-# Generate Fortran-Python interface with f2py
-try_f2py = run_command(py, '-c', 'import numpy.f2py; print("OK")', check: false)
+inc_np = include_directories(incdir_numpy)
+dependencies = [py_dep] + openmp_dependencies
+package_install_dir = get_option('python.purelibdir') / 'PyFishPack'
 
-if try_f2py.returncode() == 0
-    inc_np = include_directories(incdir_numpy, incdir_f2py)
+modern_fortran_sources = [
+    'src/fishpack_precision.f90',
+    'src/type_FishpackWorkspace.f90',
+    'src/type_GeneralizedCyclicReductionUtility.f90',
+    'src/type_CyclicReductionUtility.f90',
+    'src/type_PeriodicFastFourierTransform.f90',
+    'src/type_SepAux.f90',
+    'src/type_CenteredCyclicReductionUtility.f90',
+    'src/type_StaggeredCyclicReductionUtility.f90',
+    'src/real_block_tridiagonal_linear_systems_solver.f90',
+    'src/complex_block_tridiagonal_linear_systems_solver.f90',
+    'src/complex_linear_systems_solver.f90',
+    'src/three_dimensional_solvers.f90',
+    'src/general_linear_systems_solver_3d.f90',
+    'src/centered_cartesian_helmholtz_solver_3d.f90',
+    'src/staggered_real_linear_systems_solver.f90',
+    'src/centered_real_linear_systems_solver.f90',
+    'src/staggered_cartesian_solver.f90',
+    'src/staggered_polar_solver.f90',
+    'src/staggered_cylindrical_solver.f90',
+    'src/staggered_spherical_solver.f90',
+    'src/staggered_axisymmetric_spherical_solver.f90',
+    'src/staggered_helmholtz_solvers.f90',
+    'src/centered_cartesian_solver.f90',
+    'src/centered_polar_solver.f90',
+    'src/centered_cylindrical_solver.f90',
+    'src/centered_spherical_solver.f90',
+    'src/centered_axisymmetric_spherical_solver.f90',
+    'src/centered_helmholtz_solvers.f90',
+    'src/sepeli.f90',
+    'src/sepx4.f90',
+    'src/iterative_solvers.f90',
+    'src/fishpack_c_api.f90',
+]
 
-    # Verify numpy headers exist
-    numpy_header_check = run_command(
+fishpack_ext = py.extension_module(
+    'fishpack',
+    ['src/pyfishpack_module.c'] + modern_fortran_sources,
+    include_directories: inc_np,
+    dependencies: dependencies,
+    fortran_args: fortran_args,
+    c_args: c_args,
+    link_args: openmp_link_args,
+    install: true,
+    install_dir: package_install_dir,
+    build_by_default: true,
+)
+
+custom_target(
+    'copy_to_source_for_inplace',
+    input: fishpack_ext,
+    output: 'inplace_copy_marker.txt',
+    command: [
         py,
-        ['-c', 'import os; import numpy; header_path = os.path.join(numpy.get_include(), "numpy", "npy_os.h"); print("✓" if os.path.exists(header_path) else "✗", header_path)'],
-        check: false,
-    )
-    message('NumPy header check: ' + numpy_header_check.stdout().strip())
-
-    # Get fortranobject.c path with extensive fallbacks
-    fortranobject_cmd = run_command(
-        py,
-        ['-c', '''
-import numpy.f2py
-import numpy
-import os
-import sys
-
-# Try multiple potential paths for fortranobject.c
-candidates = []
-
-# Method 1: f2py.get_include()
-try:
-    fo_path = os.path.join(numpy.f2py.get_include(), "fortranobject.c")
-    candidates.append(fo_path)
-except:
-    pass
-
-# Method 2: numpy package paths
-numpy_base = numpy.__path__[0]
-candidates.extend([
-    os.path.join(numpy_base, "f2py", "src", "fortranobject.c"),
-    os.path.join(numpy_base, "f2py", "fortranobject.c"),
-    os.path.join(numpy_base, "_core", "src", "fortranobject.c"),
-])
-
-# Method 3: site-packages paths
-try:
-    import site
-    for site_dir in site.getsitepackages() + [site.getusersitepackages()]:
-        if site_dir:
-            candidates.extend([
-                os.path.join(site_dir, "numpy", "f2py", "src", "fortranobject.c"),
-                os.path.join(site_dir, "numpy", "f2py", "fortranobject.c"),
-            ])
-except:
-    pass
-
-# Method 4: sys.path based search
-for path in sys.path:
-    if path and "numpy" in path:
-        candidates.extend([
-            os.path.join(path, "numpy", "f2py", "src", "fortranobject.c"),
-            os.path.join(path, "numpy", "f2py", "fortranobject.c"),
-        ])
-
-# Find first existing file
-for candidate in candidates:
-    if os.path.exists(candidate):
-        print(candidate)
-        break
-else:
-    print("")  # empty if not found
-'''],
-        check: true,
-    )
-    fortranobject_c = fortranobject_cmd.stdout().strip()
-
-    # Generate f2py interface files
-    fishpack_sources = []
-    fishpack_source = custom_target(
-        'fishpackmodule.c',
-        input: ['src/fishpack.pyf'],
-        output: ['fishpackmodule.c', 'fishpack-f2pywrappers.f'],
-        command: [
-            py,
-            '-m', 'numpy.f2py',
-            '--lower', '@INPUT@',
-            '--build-dir', '@OUTDIR@',
-        ],
-        build_by_default: true,
-        install: false,
-    )
-    fishpack_sources += fishpack_source
-
-    # Add fortranobject.c if found
-    if fortranobject_c != ''
-        message('Found fortranobject.c: ' + fortranobject_c)
-        fortran_obj_check = run_command(
-            py,
-            '-c', 'import os; import sys; sys.exit(0 if os.path.exists(r"' + fortranobject_c + '") else 1)',
-            check: false,
-        )
-        if fortran_obj_check.returncode() == 0
-            fishpack_sources += files(fortranobject_c)
-            message('Added fortranobject.c to build')
-        else
-            warning('fortranobject.c path found but file does not exist: ' + fortranobject_c)
-        endif
-    else
-        warning('fortranobject.c not found - trying to build without it (may cause issues)')
-    endif
-
-    # Build dependency list
-    dependencies = [py_dep]
-    if openmp_dep.found()
-        dependencies += openmp_dep
-        message('Using OpenMP for parallel processing')
-    else
-        warning('OpenMP not found - building without parallel support')
-    endif
-
-    # Build the fishpack extension module
-    fishpack_ext = py.extension_module(
-        'fishpack',
-        [
-            # All FISHPACK Fortran sources (23 files)
-            'src/blktri.f',
-            'src/cblktri.f',
-            'src/cmgnbn.f',
-            'src/comf.f',
-            'src/fftpack.f',
-            'src/genbun.f',
-            'src/gnbnaux.f',
-            'src/hstcrt.f',
-            'src/hstcsp.f',
-            'src/hstcyl.f',
-            'src/hstplr.f',
-            'src/hstssp.f',
-            'src/hw3crt.f',
-            'src/hwscrt.f',
-            'src/hwscsp.f',
-            'src/hwscyl.f',
-            'src/hwsplr.f',
-            'src/hwsssp.f',
-            'src/pois3d.f',
-            'src/poistg.f',
-            'src/sepaux.f',
-            'src/sepeli.f',
-            'src/sepx4.f',
-            fishpack_sources,
-        ],
-        include_directories: inc_np,
-        dependencies: dependencies,
-        fortran_args: fortran_args,
-        c_args: c_args,
-        install: true,
-        install_dir: get_option('python.purelibdir') / 'PyFishPack',
-        build_by_default: true,
-    )
-
-    # Always create a copy target for source directory (for --inplace builds)
-    copy_to_source = custom_target(
-        'copy_to_source_for_inplace',
-        input: fishpack_ext,
-        output: 'inplace_copy_marker.txt',
-        command: [
-            py,
-            '-c',
-            '''
-import os
+        '-c',
+        '''
 import shutil
-import glob
 import sys
 from pathlib import Path
 
-print("=== Extension source copy check ===")
-
 current_dir = Path.cwd()
-build_dir = current_dir / "build"
-print(f"Current dir: {current_dir}")
-print(f"Build dir: {build_dir}")
-
-# Check if we should copy to source (heuristic: if no existing .pyd in source, or if it's older)
-should_copy = False
-
-# Search for compiled extension files in build directory
+module_dir = current_dir.parent
 patterns = ["fishpack*.so", "fishpack*.pyd", "fishpack*.dylib"]
-built_files = []
 
+for stale_pattern in patterns:
+    for stale_file in module_dir.glob(stale_pattern):
+        try:
+            stale_file.unlink()
+            print(f"Removed stale source artifact {stale_file.name}")
+        except Exception as exc:
+            print(f"Failed to remove stale source artifact {stale_file.name}: {exc}")
+
+copied = False
 for pattern in patterns:
-    found_files = glob.glob(str(build_dir / "**" / pattern), recursive=True)
-    built_files.extend(found_files)
+    for built_file in current_dir.rglob(pattern):
+        target = module_dir / built_file.name
+        if not target.exists() or built_file.stat().st_mtime > target.stat().st_mtime:
+            shutil.copy2(str(built_file), str(target))
+            print(f"Copied {built_file.name} to source")
+            copied = True
 
-if built_files:
-    print(f"Found built files: {built_files}")
+if not copied:
+    print("No fishpack extension artifact needed copying")
 
-    # Check if we should copy to source directory
-    for built_file_str in built_files:
-        built_file = Path(built_file_str)
-        source_file = current_dir / built_file.name
+with open(sys.argv[1], "w", encoding="utf-8") as handle:
+    handle.write("PyFishPack extension copied\\n")
+''',
+        '@OUTPUT@',
+    ],
+    build_by_default: true,
+    console: true,
+)
 
-        # Copy if source doesn't exist or is older
-        if not source_file.exists():
-            should_copy = True
-            print(f"Source {built_file.name} doesn't exist, will copy")
-        elif built_file.stat().st_mtime > source_file.stat().st_mtime:
-            should_copy = True
-            print(f"Source {built_file.name} is older, will copy")
-
-        if should_copy:
-            try:
-                if source_file.exists():
-                    source_file.unlink()
-                shutil.copy2(str(built_file), str(source_file))
-                print(f"✓ Copied {built_file.name} to source directory")
-            except Exception as e:
-                print(f"✗ Failed to copy {built_file.name}: {e}")
-else:
-    print("No compiled extension files found")
-
-# Create marker
-with open("''' + '@OUTPUT@' + '''", "w") as f:
-    f.write("Source copy check completed\\n")
-
-print("=== Extension source copy check completed ===")
-'''
-        ],
-        build_by_default: true,
-        console: true
-    )
-
-    message('fishpack module configured successfully with cross-platform optimizations')
-else
-    warning('f2py not available, skipping fishpack interface generation')
-    message('Installing Python-only fishpack module (without Fortran extensions)')
-endif
+message('PyFishPack configured with modern Fortran backend and NumPy C API wrapper')

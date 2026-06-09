@@ -365,7 +365,7 @@ setup_config = {
     "long_description_content_type": "text/markdown",
     "author": "PyFishPack Development Team",
     "author_email": "your.email@example.com",
-    "url": "https://github.com/yourusername/PyFishPack",
+    "url": "https://github.com/QianyeSu/PyFishPack",
     "packages": find_packages(include=['PyFishPack', 'PyFishPack.*']),
     "classifiers": [
         "Development Status :: 4 - Beta",
@@ -385,24 +385,6 @@ setup_config = {
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
     "python_requires": ">=3.8",
-    "install_requires": [
-        "numpy>=1.20.0",
-    ],
-    "extras_require": {
-        "dev": [
-            "pytest",
-            "pytest-cov",
-            "black",
-            "isort",
-            "flake8",
-        ],
-        "build": [
-            "meson",
-            "ninja",
-            "build",
-            "wheel",
-        ],
-    },
     "cmdclass": {
         "build_ext": MesonBuildExt,
         "develop": CustomDevelop,

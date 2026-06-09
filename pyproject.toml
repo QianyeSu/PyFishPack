@@ -42,16 +42,41 @@ dependencies = [
     "numpy>=1.24.0",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "black",
+    "isort",
+    "flake8",
+]
+build = [
+    "meson",
+    "ninja",
+    "build",
+    "wheel",
+]
+
 [project.urls]
-"Homepage" = "https://github.com/your-username/PyFishPack"
-"Repository" = "https://github.com/your-username/PyFishPack"
-"Bug Tracker" = "https://github.com/your-username/PyFishPack/issues"
+"Homepage" = "https://github.com/QianyeSu/PyFishPack"
+"Repository" = "https://github.com/QianyeSu/PyFishPack"
+"Bug Tracker" = "https://github.com/QianyeSu/PyFishPack/issues"
 
 [tool.setuptools]
 packages = ["PyFishPack"]
 
 [tool.setuptools.package-data]
-"PyFishPack" = ["*.pyd", "*.so", "*.dylib", "src/*.f", "src/*.pyf", "meson.build"]
+"PyFishPack" = [
+    "*.pyd",
+    "*.so",
+    "*.dylib",
+    "src/*.c",
+    "src/*.f90",
+    "src/*.pyf",
+    "src/archive/f77/*.f",
+    "src/archive/f77/Makefile",
+    "meson.build",
+]
 
 # Tool configurations for code quality
 

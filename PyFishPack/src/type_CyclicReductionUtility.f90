@@ -191,8 +191,8 @@ contains
             if (k == j) then
                 i = idegbr + lint
                 xx = x - tcos(i)
-                w = y
-                y = xx*y
+                w(:m) = y(:m)
+                y(:m) = xx*y(:m)
             end if
 
             temp = b(1) - x
@@ -219,7 +219,7 @@ contains
 
             if (k /= j) cycle outer_loop
 
-            y = y + w
+            y(:m) = y(:m) + w(:m)
             lint = lint + 1
             j = (lint*ifb)/ifc
 
@@ -285,9 +285,9 @@ contains
             x = tcos(n)
 
             if (k2k3k4 /= 0) then
-                if (n == l1) w1 = y1
-                if (n == l2) w2 = y2
-                if (n == l3) w3 = y3
+                if (n == l1) w1(:m) = y1(:m)
+                if (n == l2) w2(:m) = y2(:m)
+                if (n == l3) w3(:m) = y3(:m)
             end if
 
             temp = b(1) - x
@@ -315,7 +315,7 @@ contains
             if (n == l1) then
                 i = lint1 + kint1
                 xx = x - tcos(i)
-                y1 = xx*y1 + w1
+                y1(:m) = xx*y1(:m) + w1(:m)
                 lint1 = lint1 + 1
                 l1 = (lint1*if1)/if2
             end if
@@ -323,7 +323,7 @@ contains
             if (n == l2) then
                 i = lint2 + kint2
                 xx = x - tcos(i)
-                y2 = xx*y2 + w2
+                y2(:m) = xx*y2(:m) + w2(:m)
                 lint2 = lint2 + 1
                 l2 = (lint2*if1)/if3
             end if
@@ -332,7 +332,7 @@ contains
 
             i = lint3 + kint3
             xx = x - tcos(i)
-            y3 = xx*y3 + w3
+            y3(:m) = xx*y3(:m) + w3(:m)
             lint3 = lint3 + 1
             l3 = (lint3*if1)/if4
 
@@ -358,39 +358,62 @@ contains
         real(wp),    intent(inout) :: tcos(:)
 
         ! Local variables
-        integer(ip) :: j1, j2, j3, istop
+        integer(ip) :: j, j1, j2, k, l, m
 
-        if (m1 == 0 .and. m2 == 0) then
+        j1 = 1
+        j2 = 1
+        j = i3
+
+        if (m1 == 0) then
+            if (m2 == 0) return
+            k = j - j2 + 1
+            do j = j2, m2
+                m = k + j
+                l = j + i2
+                tcos(m) = tcos(l)
+            end do
             return
-        else if (m1 == 0 .and. m2 /= 0) then
-            istop = m2
-            tcos(i3+1:istop) = tcos(i2+1:istop)
-        else if (m1 /= 0 .and. m2 == 0) then
-            istop = m1
-            tcos(i3+1:istop) = tcos(i1+1:istop)
-        else
-            j1 = 1
-            j2 = 1
-            j3 = 1
-            do
-                if (tcos(i1+j1)  <=  tcos(i2+j2)) then
-                    tcos(i3+j3) = tcos(i1+j1)
-                    j1 = j1+1
-                    if (j1  >  m1) then
-                        istop = m2-j2+1
-                        tcos(i3+j3+1:istop) = tcos(i2+j2:istop)
-                        return
-                    end if
-                else
-                    tcos(i3+j3) = tcos(i2+j2)
-                    j2 = j2+1
-                    if (j2  >  m2) then
-                        istop = m1-j1+1
-                        tcos(i3+j3+1:istop) = tcos(i1+j1:istop)
-                        return
-                    end if
+        end if
+
+        if (m2 == 0) then
+            k = j - j1 + 1
+            do j = j1, m1
+                m = k + j
+                l = j + i1
+                tcos(m) = tcos(l)
+            end do
+            return
+        end if
+
+        do
+            j = j + 1
+            if (tcos(i1+j1) <= tcos(i2+j2)) then
+                tcos(j) = tcos(i1+j1)
+                j1 = j1 + 1
+                if (j1 > m1) exit
+            else
+                tcos(j) = tcos(i2+j2)
+                j2 = j2 + 1
+                if (j2 > m2) then
+                    if (j1 > m1) return
+                    exit
                 end if
-                j3 = j3+1
+            end if
+        end do
+
+        if (j1 <= m1) then
+            k = j - j1 + 1
+            do j = j1, m1
+                m = k + j
+                l = j + i1
+                tcos(m) = tcos(l)
+            end do
+        else if (j2 <= m2) then
+            k = j - j2 + 1
+            do j = j2, m2
+                m = k + j
+                l = j + i2
+                tcos(m) = tcos(l)
             end do
         end if
 

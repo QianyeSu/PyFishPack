@@ -3,6 +3,9 @@
 *.lo
 *.o
 *.obj
+*.egg-info/
+__pycache__/
+*/__pycache__/
 
 # Precompiled Headers
 *.gch
@@ -33,8 +36,9 @@
 *.dat
 /Debug/
 /build/
+PyFishPack/build/
+reports/
 # Eclipse IDE files
 .cproject
 .project
 .settings
-PyFishPack/__pycache__/__init__.cpython-312.pyc

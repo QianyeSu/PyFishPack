@@ -591,7 +591,7 @@ contains
         real(wp),    intent(in)    :: a(m)
         real(wp),    intent(in)    :: bb(m)
         real(wp),    intent(in)    :: c(m)
-        real(wp),    intent(inout) :: q(idimq,m)
+        real(wp),    intent(inout) :: q(idimq,n)
         real(wp),    intent(inout) :: b(m)
         real(wp),    intent(inout) :: b2(m)
         real(wp),    intent(inout) :: b3(m)
@@ -599,7 +599,7 @@ contains
         real(wp),    intent(inout) :: w2(m)
         real(wp),    intent(inout) :: w3(m)
         real(wp),    intent(inout) :: d(m)
-        real(wp),    intent(inout) :: tcos(m)
+        real(wp),    intent(inout) :: tcos(4*n)
         real(wp),    intent(inout) :: p(4*n)
 
         ! Local variables
@@ -1109,7 +1109,7 @@ contains
         real(wp),    intent(in)     :: a(m)
         real(wp),    intent(in)     :: bb(m)
         real(wp),    intent(in)     :: c(m)
-        real(wp),    intent(inout) :: q(idimq,m)
+        real(wp),    intent(inout) :: q(idimq,n)
         real(wp),    intent(inout) :: b(m)
         real(wp),    intent(inout) :: b2(m)
         real(wp),    intent(inout) :: b3(m)
@@ -1117,7 +1117,7 @@ contains
         real(wp),    intent(inout) :: w2(m)
         real(wp),    intent(inout) :: w3(m)
         real(wp),    intent(inout) :: d(m)
-        real(wp),    intent(inout) :: tcos(m)
+        real(wp),    intent(inout) :: tcos(4*n)
         real(wp),    intent(inout) :: p(4*n)
 
         ! Local variables
