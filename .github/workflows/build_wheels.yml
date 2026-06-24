@@ -6,6 +6,8 @@ on:
     tags: ["v*"]
   pull_request:
     branches: [dev, main]
+  release:
+    types: [published]
   workflow_dispatch:
 
 concurrency:
@@ -150,3 +152,73 @@ jobs:
         with:
           name: sdist
           path: dist/*.tar.gz
+
+  publish:
+    name: Publish to PyPI
+    if: (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) || (github.event_name == 'release' && github.event.action == 'published')
+    needs: [build_wheels, build_sdist]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v8
+        with:
+          pattern: "*"
+          path: dist-artifacts
+          merge-multiple: true
+
+      - name: Prepare dist directory
+        run: |
+          mkdir -p dist
+          find dist-artifacts -name "*.whl" -exec cp {} dist/ \;
+          find dist-artifacts -name "*.tar.gz" -exec cp {} dist/ \;
+          ls -la dist/
+
+      - name: Check whether this version is already on PyPI
+        id: pypi_check
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(
+            python - <<'PY'
+          import tomllib
+
+          with open("pyproject.toml", "rb") as f:
+              print(tomllib.load(f)["project"]["version"])
+          PY
+          )"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+
+          status_code="$(
+            curl -sS -o /dev/null -w '%{http_code}' \
+              "https://pypi.org/pypi/PyFishPack/${version}/json"
+          )"
+
+          case "$status_code" in
+            200)
+              echo "should_publish=false" >> "$GITHUB_OUTPUT"
+              echo "PyPI already has PyFishPack ${version}; skipping publish."
+              ;;
+            404)
+              echo "should_publish=true" >> "$GITHUB_OUTPUT"
+              echo "PyPI does not have PyFishPack ${version}; continuing publish."
+              ;;
+            *)
+              echo "Unexpected response from PyPI for PyFishPack ${version}: HTTP ${status_code}" >&2
+              exit 1
+              ;;
+          esac
+
+      - name: Report skipped publish
+        if: steps.pypi_check.outputs.should_publish != 'true'
+        shell: bash
+        run: |
+          echo "Skipping PyPI publish because PyFishPack ${{ steps.pypi_check.outputs.version }} already exists."
+
+      - name: Publish to PyPI
+        if: steps.pypi_check.outputs.should_publish == 'true'
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
