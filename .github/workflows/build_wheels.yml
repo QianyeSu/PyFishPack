@@ -24,18 +24,10 @@ jobs:
       matrix:
         platform:
           - [ubuntu-latest, manylinux_x86_64]
-          - [ubuntu-latest, manylinux2014_x86_64]
           - [macos-14, macosx_arm64]
           - [macos-15-intel, macosx_x86_64]
           - [windows-2022, win_amd64]
         python: ["cp39", "cp310", "cp311", "cp312", "cp313"]
-        exclude:
-          - platform: [ubuntu-latest, manylinux2014_x86_64]
-            python: cp311
-          - platform: [ubuntu-latest, manylinux2014_x86_64]
-            python: cp312
-          - platform: [ubuntu-latest, manylinux2014_x86_64]
-            python: cp313
 
     steps:
       - name: Checkout
@@ -46,12 +38,7 @@ jobs:
       - name: Setup Linux build deps
         if: startsWith(matrix.platform[1], 'manylinux')
         run: |
-          echo "CIBW_BEFORE_BUILD_LINUX=yum install -y gcc-gfortran || dnf install -y gcc-gfortran || echo 'gfortran install failed'" >> "$GITHUB_ENV"
-          if [ "${{ matrix.platform[1] }}" = "manylinux2014_x86_64" ]; then
-            echo "CIBW_MANYLINUX_X86_64_IMAGE=manylinux2014" >> "$GITHUB_ENV"
-          else
-            echo "CIBW_MANYLINUX_X86_64_IMAGE=manylinux_2_28" >> "$GITHUB_ENV"
-          fi
+          echo "CIBW_MANYLINUX_X86_64_IMAGE=manylinux_2_28" >> "$GITHUB_ENV"
 
       - name: Setup macOS toolchain
         if: startsWith(matrix.platform[0], 'macos')
@@ -131,7 +118,7 @@ jobs:
           CIBW_BUILD_VERBOSITY: 1
           CIBW_BEFORE_BUILD: python -m pip install meson ninja
           CIBW_ENVIRONMENT_LINUX: FC=gfortran F77=gfortran F90=gfortran CC=gcc
-          CIBW_ENVIRONMENT_MACOS: FC=${{ env.MACOS_FC }} F77=${{ env.MACOS_F77 }} F90=${{ env.MACOS_F90 }} CC=${{ env.MACOS_CC }} CXX=${{ env.MACOS_CXX }}
+          CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=15.0 FC=${{ env.MACOS_FC }} F77=${{ env.MACOS_F77 }} F90=${{ env.MACOS_F90 }} CC=${{ env.MACOS_CC }} CXX=${{ env.MACOS_CXX }}
           CIBW_ENVIRONMENT_WINDOWS: FC=${{ env.MSYS2_FC }} F77=${{ env.MSYS2_F77 }} F90=${{ env.MSYS2_F90 }} CC=${{ env.MSYS2_CC }} CXX=${{ env.MSYS2_CXX }} PKG_CONFIG=${{ env.MSYS2_PKG_CONFIG }}
           CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: delvewheel repair -w {dest_dir} {wheel}
 
