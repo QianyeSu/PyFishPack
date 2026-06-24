@@ -109,8 +109,8 @@ def invert_Poisson(
     params = dict(iParams or {})
     bcs = _normalize_bcs(BCs if BCs is not None else params.get("BCs", None))
 
-    if _is_xarray_dataarray(F):
-        return _invert_poisson_xarray(
+    if _is_dataarray(F):
+        return _invert_poisson_labeled(
             F, dims=dims, bcs=bcs, spacing=spacing, raise_on_error=raise_on_error
         )
 
@@ -163,7 +163,7 @@ def invert_RefState(
         Inverted angular-momentum field named ``"inverted"``.
     """
 
-    _require_xarray(PV, "invert_RefState")
+    _require_dataarray(PV, "invert_RefState")
     if dims is None or len(dims) != 2:
         raise ValueError("invert_RefState requires two xarray dimension names")
     if coords.lower() not in {"z-lat", "cartesian"}:
@@ -172,7 +172,7 @@ def invert_RefState(
     params = _merged_mparams(mParams)
     iparams = _merged_iparams(iParams, ndim=2, BCs=BCs)
     bcs = _normalize_sor_bcs(iparams["BCs"], 2)
-    mask_f, init_s, zero = _mask_xarray_field(PV, dims, iparams, bcs, icbc)
+    mask_f, init_s, zero = _mask_labeled_field(PV, dims, iparams, bcs, icbc)
     ydim, xdim = dims
     xcoord = mask_f.coords[xdim]
 
@@ -186,7 +186,7 @@ def invert_RefState(
         dy, dx = _sor_spacing2d(mask_f, (ydim, xdim), coords, float(params["Rearth"]))
 
     bcoef = zero
-    solved = _solve_sor2d_xarray(
+    solved = _solve_sor2d_labeled(
         init_s,
         acoef,
         bcoef,
@@ -198,7 +198,7 @@ def invert_RefState(
         bcs=bcs,
         iparams=iparams,
     )
-    return _demask_xarray_result(solved, mask_f, iparams, icbc)
+    return _restore_labeled_result(solved, mask_f, iparams, icbc)
 
 
 def invert_RefStateSWM(
@@ -242,7 +242,7 @@ def invert_RefStateSWM(
         Inverted mass-correction field named ``"inverted"``.
     """
 
-    _require_xarray(Q, "invert_RefStateSWM")
+    _require_dataarray(Q, "invert_RefStateSWM")
     if dims is None or len(dims) != 1:
         raise ValueError("invert_RefStateSWM requires one xarray dimension name")
     if coords.lower() != "lat":
@@ -251,7 +251,7 @@ def invert_RefStateSWM(
     params = _merged_mparams(mParams)
     iparams = _merged_iparams(iParams, ndim=1, BCs=BCs)
     bcs = _normalize_sor_bcs(iparams["BCs"], 1)
-    mask_f, init_s, zero = _mask_xarray_field(Q, dims, iparams, bcs, icbc)
+    mask_f, init_s, zero = _mask_labeled_field(Q, dims, iparams, bcs, icbc)
     dim = dims[0]
     lat = np.deg2rad(mask_f.coords[dim])
     cos_g = np.cos(lat)
@@ -261,8 +261,8 @@ def invert_RefStateSWM(
     acos = float(params["Rearth"]) * cos_g
     acos = acos.where(acos >= 0.0, other=-acos * 0.1)
 
-    m0 = _as_xarray_like(params["M0"], mask_f)
-    c0 = _as_xarray_like(params["C0"], mask_f)
+    m0 = _as_labeled_like(params["M0"], mask_f)
+    c0 = _as_labeled_like(params["C0"], mask_f)
     delx = _sor_spacing1d(mask_f, dim, coords, float(params["Rearth"]))
     diff = _second_diff_swm(m0, cos_h, delx, dim)
 
@@ -274,7 +274,7 @@ def invert_RefStateSWM(
         + (2.0 * np.pi * float(params["Omega"]) ** 2.0 * asin * acos) / float(params["g"])
         - diff
     )
-    solved = _solve_sor1d_xarray(
+    solved = _solve_sor1d_labeled(
         init_s,
         acoef,
         bcoef,
@@ -284,7 +284,7 @@ def invert_RefStateSWM(
         bcs=bcs,
         iparams=iparams,
     )
-    return _demask_xarray_result(solved, mask_f, iparams, icbc)
+    return _restore_labeled_result(solved, mask_f, iparams, icbc)
 
 
 def invert_geostrophic(
@@ -347,7 +347,7 @@ def invert_geostrophic(
     if f0 == 0.0:
         raise ValueError("f0 must be non-zero")
     return _invert_constant_helmholtz(
-        np.asarray(lapPhi, dtype=np.float64) / f0 if not _is_xarray_dataarray(lapPhi) else lapPhi / f0,
+        np.asarray(lapPhi, dtype=np.float64) / f0 if not _is_dataarray(lapPhi) else lapPhi / f0,
         dims=dims,
         coords=coords,
         iParams=iParams,
@@ -719,7 +719,7 @@ def invert_BrethertonHaidvogel(
     if depth == 0.0:
         raise ValueError("D/depth must be non-zero")
     coriolis = _cartesian_coriolis_field(h, dims, spacing, params)
-    if _is_xarray_dataarray(h):
+    if _is_dataarray(h):
         forcing = -(h * coriolis) / depth
     else:
         forcing = -(np.asarray(h, dtype=np.float64) * coriolis) / depth
@@ -778,7 +778,7 @@ def invert_Stommel(
     if depth == 0.0 or rho0 == 0.0:
         raise ValueError("D and rho0 must be non-zero")
     alpha = -resistance / depth
-    forcing = curl * (-1.0 / (depth * rho0)) if _is_xarray_dataarray(curl) else np.asarray(curl, dtype=np.float64) * (-1.0 / (depth * rho0))
+    forcing = curl * (-1.0 / (depth * rho0)) if _is_dataarray(curl) else np.asarray(curl, dtype=np.float64) * (-1.0 / (depth * rho0))
     if beta != 0.0:
         return _invert_general_2d(
             forcing,
@@ -878,14 +878,12 @@ def invert_StommelMunk(
     spacing: Sequence[float] | None = None,
     raise_on_error: bool = True,
 ) -> Any:
-    r"""Invert the Cartesian Stommel-Munk equation in the supported subset.
+    r"""Invert the Cartesian Stommel-Munk equation in xinvert form.
 
-    Current support is the Cartesian uniform-grid ``A4 = 0`` subset, which
-    delegates to :func:`invert_Stommel`.  Beta handling therefore follows
-    :func:`invert_Stommel` in the ``A4 = 0`` case: ``beta = 0`` uses the
-    direct Fishpack / ``genbun`` path, while ``beta != 0`` uses the modern
-    Fortran ``sor_general2d`` backend.  ``A4 != 0`` biharmonic, non-Cartesian,
-    and other unsupported cases intentionally raise ``NotImplementedError``.
+    The ``A4 = 0`` subset delegates to :func:`invert_Stommel`.  Nonzero
+    ``A4`` uses the modern Fortran ``sor_biharmonic2d`` backend for the
+    Cartesian fourth-order Stommel-Munk equation.  Lat-lon and other
+    non-Cartesian formulations remain unsupported.
 
     Parameters
     ----------
@@ -898,9 +896,8 @@ def invert_StommelMunk(
     icbc : any, optional
         Accepted for xinvert-style compatibility and ignored.
     mParams : dict, optional
-        Equation-parameter mapping.  This subset may use ``A4``, ``beta``,
-        ``D``, ``rho0``, and ``R``; ``A4`` must be zero and the ``beta``
-        handling follows :func:`invert_Stommel`.
+        Equation-parameter mapping.  This wrapper uses ``A4``, ``beta``,
+        ``D``, ``rho0``, and ``R``.
     iParams : dict, optional
         Inversion-parameter mapping.  Boundary conditions may be supplied
         through ``iParams["BCs"]`` when ``BCs`` is not passed explicitly.
@@ -918,10 +915,30 @@ def invert_StommelMunk(
     """
 
     params = _merged_mparams(mParams)
-    if _scalar_param(params, "A4") != 0.0:
-        raise NotImplementedError(
-            "invert_StommelMunk currently supports only the A4=0 subset; "
-            "the biharmonic A4!=0 equation is not covered by the current Fishpack backend"
+    a4 = _scalar_param(params, "A4")
+    if a4 != 0.0:
+        if coords != "cartesian":
+            raise NotImplementedError("invert_StommelMunk currently supports Cartesian coordinates only")
+        depth = _scalar_param(params, "D")
+        rho0 = _scalar_param(params, "rho0")
+        if depth == 0.0 or rho0 == 0.0:
+            raise ValueError("D and rho0 must be non-zero")
+        forcing = (
+            curl * (-1.0 / (depth * rho0))
+            if _is_dataarray(curl)
+            else np.asarray(curl, dtype=np.float64) * (-1.0 / (depth * rho0))
+        )
+        resistance = _scalar_param(params, "R")
+        beta = _scalar_param(params, "beta")
+        return _invert_biharmonic_2d(
+            forcing,
+            dims=dims,
+            coords=coords,
+            iParams=iParams,
+            BCs=BCs,
+            spacing=spacing,
+            icbc=icbc,
+            coefficients=(a4, 0.0, a4, -resistance / depth, 0.0, -resistance / depth, 0.0, -beta, 0.0),
         )
     return invert_Stommel(
         curl,
@@ -1025,11 +1042,11 @@ def invert_omega(
     spacing: Sequence[float] | None = None,
     raise_on_error: bool = True,
 ) -> Any:
-    r"""Invert the Cartesian constant-coefficient QG omega equation.
+    r"""Invert the Cartesian QG omega equation.
 
-    Only the Cartesian, uniform-grid, constant-coefficient subset is
-    supported.  Beta-plane and non-Cartesian formulations intentionally raise
-    ``NotImplementedError``.
+    The constant-Coriolis subset uses the direct Fishpack 3-D solver.  The
+    Cartesian beta-plane subset uses the modern Fortran ``sor_standard3d``
+    backend with xinvert-style flux coefficients.
 
     Parameters
     ----------
@@ -1045,17 +1062,29 @@ def invert_omega(
         The inverted field with the same array type as the input.
     """
 
-    del icbc
     if coords != "cartesian":
         raise NotImplementedError("invert_omega currently supports Cartesian coordinates only")
     params = _merged_mparams(mParams)
-    if float(params["beta"]) != 0.0:
-        raise NotImplementedError("invert_omega currently supports only constant f0 (beta=0)")
+    beta = float(params["beta"])
     n2 = float(params["N2"])
     if n2 <= 0.0:
         raise ValueError("N2 must be a positive scalar")
     f0 = float(params["f0"])
-    rhs = F / n2 if _is_xarray_dataarray(F) else np.asarray(F, dtype=np.float64) / n2
+    if beta != 0.0:
+        return _invert_standard_3d(
+            F,
+            dims=dims,
+            coords=coords,
+            iParams=iParams,
+            BCs=BCs,
+            spacing=spacing,
+            icbc=icbc,
+            coefficients=_cartesian_omega_coefficients(
+                F, dims=dims, spacing=spacing, f0=f0, beta=beta, n2=n2
+            ),
+        )
+    del icbc
+    rhs = F / n2 if _is_dataarray(F) else np.asarray(F, dtype=np.float64) / n2
     return _invert_constant_3d(
         rhs,
         dims=dims,
@@ -1115,12 +1144,10 @@ def invert_3DOcean(
         The inverted field with the same array type as the input.
     """
 
-    del icbc
     if coords != "cartesian":
         raise NotImplementedError("invert_3DOcean currently supports Cartesian coordinates only")
     params = _merged_mparams(mParams)
-    if _scalar_param(params, "beta") != 0.0:
-        raise NotImplementedError("invert_3DOcean currently supports only constant f0 (beta=0)")
+    beta = _scalar_param(params, "beta")
     epsilon = _scalar_param(params, "epsilon")
     f0 = _scalar_param(params, "f0")
     n2 = _scalar_param(params, "N2")
@@ -1130,6 +1157,27 @@ def invert_3DOcean(
     denom = epsilon * epsilon + f0 * f0
     if denom == 0.0:
         raise ValueError("epsilon and f0 cannot both be zero")
+    if beta != 0.0:
+        return _invert_general_3d(
+            F,
+            dims=dims,
+            coords=coords,
+            iParams=iParams,
+            BCs=BCs,
+            spacing=spacing,
+            icbc=icbc,
+            coefficients=_cartesian_3d_ocean_coefficients(
+                F,
+                dims=dims,
+                spacing=spacing,
+                epsilon=epsilon,
+                f0=f0,
+                beta=beta,
+                n2=n2,
+                buoyancy_damping=buoyancy_damping,
+            ),
+        )
+    del icbc
     horizontal = epsilon / denom
     vertical = buoyancy_damping / n2
     return _invert_constant_3d(
@@ -1185,8 +1233,74 @@ def invert_MultiGrid(
     return solution, [list(args)], [solution]
 
 
-def _require_xarray(field: Any, func_name: str) -> None:
-    if not _is_xarray_dataarray(field):
+def spectral_transform(
+    data: Any,
+    *,
+    kind: str = "rfft",
+    direction: str = "forward",
+    axis: int = -1,
+    normalize: bool = False,
+) -> np.ndarray:
+    """Apply a lightweight one-dimensional FFTPACK transform along an array axis."""
+
+    transform = kind.lower()
+    direct = direction.lower()
+    if direct not in {"forward", "backward", "inverse"}:
+        raise ValueError("direction must be 'forward', 'backward', or 'inverse'")
+    inverse = direct in {"backward", "inverse"}
+
+    real_methods = {
+        ("rfft", False): fishpack.rfftf,
+        ("rfft", True): fishpack.rfftb,
+        ("sint", False): fishpack.sint,
+        ("sint", True): fishpack.sint,
+        ("cost", False): fishpack.cost,
+        ("cost", True): fishpack.cost,
+        ("sinq", False): fishpack.sinqf,
+        ("sinq", True): fishpack.sinqb,
+        ("cosq", False): fishpack.cosqf,
+        ("cosq", True): fishpack.cosqb,
+    }
+
+    if transform == "cfft":
+        arr = np.asarray(data, dtype=np.complex128)
+        if arr.ndim == 0:
+            raise ValueError("spectral_transform expects at least one-dimensional input")
+        axis = axis % arr.ndim
+        moved = np.moveaxis(arr, axis, -1)
+        flat = moved.reshape((-1, moved.shape[-1]))
+        out = np.empty_like(flat)
+        method = fishpack.cfftb if inverse else fishpack.cfftf
+        for idx, row in enumerate(flat):
+            interleaved = np.ascontiguousarray(row, dtype=np.complex128).view(np.float64)
+            transformed = np.asarray(method(interleaved), dtype=np.float64).view(np.complex128)
+            out[idx] = transformed
+        result = out.reshape(moved.shape)
+        if normalize and inverse:
+            result = result / moved.shape[-1]
+        return np.moveaxis(result, -1, axis)
+
+    method = real_methods.get((transform, inverse))
+    if method is None:
+        raise ValueError("kind must be one of 'rfft', 'cfft', 'sint', 'cost', 'sinq', or 'cosq'")
+
+    arr = np.asarray(data, dtype=np.float64)
+    if arr.ndim == 0:
+        raise ValueError("spectral_transform expects at least one-dimensional input")
+    axis = axis % arr.ndim
+    moved = np.moveaxis(arr, axis, -1)
+    flat = moved.reshape((-1, moved.shape[-1]))
+    out = np.empty_like(flat)
+    for idx, row in enumerate(flat):
+        out[idx] = method(np.ascontiguousarray(row, dtype=np.float64))
+    result = out.reshape(moved.shape)
+    if normalize and inverse and transform == "rfft":
+        result = result / moved.shape[-1]
+    return np.moveaxis(result, -1, axis)
+
+
+def _require_dataarray(field: Any, func_name: str) -> None:
+    if not _is_dataarray(field):
         raise NotImplementedError(f"{func_name} currently requires an xarray.DataArray input")
 
 
@@ -1205,7 +1319,7 @@ def _merged_iparams(
     return merged
 
 
-def _mask_xarray_field(
+def _mask_labeled_field(
     field: Any,
     dims: Sequence[str],
     iparams: dict[str, Any],
@@ -1232,19 +1346,19 @@ def _mask_xarray_field(
                 coord = mask_f.coords[dim]
                 cond = coord.isin([coord[0], coord[-1]])
                 mask = np.logical_or(mask, cond)
-        init_s = field.__class__(icbc, coords=field.coords, dims=field.dims) if not _is_xarray_dataarray(icbc) else icbc
+        init_s = field.__class__(icbc, coords=field.coords, dims=field.dims) if not _is_dataarray(icbc) else icbc
         init_s = init_s.where(mask, other=0)
     return mask_f, init_s.load(), zero
 
 
-def _demask_xarray_result(result: Any, mask_f: Any, iparams: dict[str, Any], icbc: Any) -> Any:
+def _restore_labeled_result(result: Any, mask_f: Any, iparams: dict[str, Any], icbc: Any) -> Any:
     result = result.rename("inverted")
     if icbc is None:
         return result.where(mask_f != _UNDEF, other=iparams["undef"])
     return result
 
 
-def _solve_sor2d_xarray(
+def _solve_sor2d_labeled(
     init_s: Any,
     acoef: Any,
     bcoef: Any,
@@ -1322,6 +1436,88 @@ def _solve_sor2d_xarray(
     return result.transpose(*force.dims)
 
 
+def _solve_sor3d_labeled(
+    init_s: Any,
+    acoef: Any,
+    bcoef: Any,
+    ccoef: Any,
+    force: Any,
+    *,
+    dims: Sequence[str],
+    dz: float,
+    dy: float,
+    dx: float,
+    bcs: tuple[str, ...],
+    iparams: dict[str, Any],
+) -> Any:
+    import xarray as xr
+
+    zdim, ydim, xdim = dims
+    acoef, bcoef, ccoef, force, init_s = xr.broadcast(acoef, bcoef, ccoef, force, init_s)
+    outer_dims = tuple(dim for dim in force.dims if dim not in dims)
+    order = (*outer_dims, zdim, ydim, xdim)
+    a_t = acoef.transpose(*order)
+    b_t = bcoef.transpose(*order)
+    c_t = ccoef.transpose(*order)
+    f_t = force.transpose(*order)
+    s_t = init_s.transpose(*order)
+    values = np.empty(s_t.shape, dtype=np.float64)
+    optarg = _sor_optarg(iparams, s_t.shape[-3:])
+
+    if s_t.ndim == 3:
+        solved, relerr, overflow, loops = fishpack.sor_standard3d(
+            s_t.values,
+            a_t.values,
+            b_t.values,
+            c_t.values,
+            f_t.values,
+            dz,
+            dy,
+            dx,
+            bcs[0],
+            bcs[1],
+            bcs[2],
+            optarg,
+            _UNDEF,
+            int(iparams["mxLoop"]),
+            float(iparams["tolerance"]),
+        )
+        values[...] = solved
+        if overflow:
+            raise RuntimeError("Fortran SOR standard3d overflowed")
+    else:
+        for index in np.ndindex(s_t.shape[:-3]):
+            solved, relerr, overflow, loops = fishpack.sor_standard3d(
+                s_t.values[index],
+                a_t.values[index],
+                b_t.values[index],
+                c_t.values[index],
+                f_t.values[index],
+                dz,
+                dy,
+                dx,
+                bcs[0],
+                bcs[1],
+                bcs[2],
+                optarg,
+                _UNDEF,
+                int(iparams["mxLoop"]),
+                float(iparams["tolerance"]),
+            )
+            values[index] = solved
+            if overflow:
+                raise RuntimeError("Fortran SOR standard3d overflowed")
+
+    result = force.__class__(
+        values,
+        coords=s_t.coords,
+        dims=s_t.dims,
+        attrs=dict(force.attrs),
+        name="inverted",
+    )
+    return result.transpose(*force.dims)
+
+
 def _invert_standard_2d(
     F: Any,
     *,
@@ -1337,8 +1533,8 @@ def _invert_standard_2d(
         raise NotImplementedError("standard-form SOR currently supports Cartesian coordinates only")
     iparams = _merged_iparams(iParams, ndim=2, BCs=BCs)
     bcs = _normalize_sor_bcs(iparams["BCs"], 2)
-    if _is_xarray_dataarray(F):
-        return _invert_standard_2d_xarray(
+    if _is_dataarray(F):
+        return _invert_standard_2d_labeled(
             F,
             dims=dims,
             bcs=bcs,
@@ -1358,7 +1554,7 @@ def _invert_standard_2d(
     )
 
 
-def _invert_standard_2d_xarray(
+def _invert_standard_2d_labeled(
     field: Any,
     *,
     dims: Sequence[str] | Sequence[int] | None,
@@ -1374,10 +1570,10 @@ def _invert_standard_2d_xarray(
         dims = field.dims[-2:]
     if len(dims) != 2 or not all(isinstance(dim, str) for dim in dims):
         raise TypeError("xarray standard-form inversion requires two dimension names")
-    mask_f, init_s, _zero = _mask_xarray_field(field, dims, iparams, bcs, icbc)
-    dy, dx = _spacing_for_xarray(mask_f, (dims[0], dims[1]), spacing)
-    coefs = tuple(_as_xarray_like(coef, mask_f) for coef in coefficients)
-    solved = _solve_sor2d_xarray(
+    mask_f, init_s, _zero = _mask_labeled_field(field, dims, iparams, bcs, icbc)
+    dy, dx = _spacing_for_labeled(mask_f, (dims[0], dims[1]), spacing)
+    coefs = tuple(_as_labeled_like(coef, mask_f) for coef in coefficients)
+    solved = _solve_sor2d_labeled(
         init_s,
         coefs[0],
         coefs[1],
@@ -1389,7 +1585,7 @@ def _invert_standard_2d_xarray(
         bcs=bcs,
         iparams=iparams,
     )
-    return _demask_xarray_result(solved, mask_f, iparams, icbc)
+    return _restore_labeled_result(solved, mask_f, iparams, icbc)
 
 
 def _invert_standard_2d_ndarray(
@@ -1441,6 +1637,132 @@ def _invert_standard_2d_ndarray(
         iparams=iparams,
     )
     return np.moveaxis(solved, (-2, -1), axes_tuple)
+
+
+def _invert_standard_3d(
+    F: Any,
+    *,
+    dims: Sequence[str] | Sequence[int] | None,
+    coords: str,
+    iParams: dict[str, Any] | None,
+    BCs: Sequence[str] | None,
+    spacing: Sequence[float] | None,
+    icbc: Any,
+    coefficients: tuple[Any, Any, Any],
+) -> Any:
+    if coords != "cartesian":
+        raise NotImplementedError("standard-form 3D SOR currently supports Cartesian coordinates only")
+    iparams = _merged_iparams(iParams, ndim=3, BCs=BCs)
+    bcs = _normalize_sor_bcs(iparams["BCs"], 3)
+    if bcs[0] == "periodic" or bcs[1] == "periodic":
+        raise NotImplementedError("standard-form 3D SOR currently supports periodic boundaries only in x")
+    if _is_dataarray(F):
+        return _invert_standard_3d_labeled(
+            F,
+            dims=dims,
+            bcs=bcs,
+            spacing=spacing,
+            iparams=iparams,
+            icbc=icbc,
+            coefficients=coefficients,
+        )
+    return _invert_standard_3d_ndarray(
+        F,
+        axes=dims,
+        bcs=bcs,
+        spacing=spacing,
+        iparams=iparams,
+        icbc=icbc,
+        coefficients=coefficients,
+    )
+
+
+def _invert_standard_3d_labeled(
+    field: Any,
+    *,
+    dims: Sequence[str] | Sequence[int] | None,
+    bcs: tuple[str, ...],
+    spacing: Sequence[float] | None,
+    iparams: dict[str, Any],
+    icbc: Any,
+    coefficients: tuple[Any, Any, Any],
+) -> Any:
+    if dims is None:
+        if field.ndim < 3:
+            raise ValueError("dims must be supplied for xarray inputs with fewer than 3 dimensions")
+        dims = field.dims[-3:]
+    if len(dims) != 3 or not all(isinstance(dim, str) for dim in dims):
+        raise TypeError("xarray standard-form 3D inversion requires three dimension names")
+    mask_f, init_s, _zero = _mask_labeled_field(field, dims, iparams, bcs, icbc)
+    dz, dy, dx = _spacing_for_labeled3d(mask_f, (dims[0], dims[1], dims[2]), spacing)
+    coefs = tuple(_as_labeled_like(coef, mask_f) for coef in coefficients)
+    solved = _solve_sor3d_labeled(
+        init_s,
+        coefs[0],
+        coefs[1],
+        coefs[2],
+        mask_f,
+        dims=dims,
+        dz=dz,
+        dy=dy,
+        dx=dx,
+        bcs=bcs,
+        iparams=iparams,
+    )
+    return _restore_labeled_result(solved, mask_f, iparams, icbc)
+
+
+def _invert_standard_3d_ndarray(
+    field: Any,
+    *,
+    axes: Sequence[str] | Sequence[int] | None,
+    bcs: tuple[str, ...],
+    spacing: Sequence[float] | None,
+    iparams: dict[str, Any],
+    icbc: Any,
+    coefficients: tuple[Any, Any, Any],
+) -> np.ndarray:
+    arr = np.asarray(field, dtype=np.float64)
+    if arr.ndim < 3:
+        raise ValueError("standard-form 3D inversion requires at least a three-dimensional array")
+    if axes is None:
+        axes_tuple = (arr.ndim - 3, arr.ndim - 2, arr.ndim - 1)
+    else:
+        if len(axes) != 3 or not all(isinstance(axis, int) for axis in axes):
+            raise TypeError("NumPy standard-form 3D inversion requires three integer axes")
+        axes_tuple = tuple(axis % arr.ndim for axis in axes)
+    if len(set(axes_tuple)) != 3:
+        raise ValueError("inversion axes must be distinct")
+
+    dz, dy, dx = _normalize_spacing3d(spacing)
+    moved = np.moveaxis(arr, axes_tuple, (-3, -2, -1))
+    init = (
+        np.zeros_like(moved)
+        if icbc is None
+        else np.moveaxis(np.asarray(icbc, dtype=np.float64), axes_tuple, (-3, -2, -1))
+    )
+    moved_coefficients = []
+    for coef in coefficients:
+        coef_arr = np.asarray(coef, dtype=np.float64)
+        if coef_arr.ndim == arr.ndim and coef_arr.shape == arr.shape:
+            coef_arr = np.moveaxis(coef_arr, axes_tuple, (-3, -2, -1))
+        moved_coefficients.append(coef_arr)
+    coef_arrays = tuple(
+        _broadcast_ndarray_coefficient(coef, moved.shape) for coef in moved_coefficients
+    )
+    solved = _solve_sor_standard3d_batched(
+        init,
+        coef_arrays[0],
+        coef_arrays[1],
+        coef_arrays[2],
+        moved,
+        dz=dz,
+        dy=dy,
+        dx=dx,
+        bcs=bcs,
+        iparams=iparams,
+    )
+    return np.moveaxis(solved, (-3, -2, -1), axes_tuple)
 
 
 def _solve_sor_standard2d_batched(
@@ -1504,6 +1826,72 @@ def _solve_sor_standard2d_batched(
     return values
 
 
+def _solve_sor_standard3d_batched(
+    init_s: np.ndarray,
+    acoef: np.ndarray,
+    bcoef: np.ndarray,
+    ccoef: np.ndarray,
+    force: np.ndarray,
+    *,
+    dz: float,
+    dy: float,
+    dx: float,
+    bcs: tuple[str, ...],
+    iparams: dict[str, Any],
+) -> np.ndarray:
+    arrays = [np.asarray(item, dtype=np.float64) for item in (init_s, acoef, bcoef, ccoef, force)]
+    shape = np.broadcast_shapes(*(item.shape for item in arrays))
+    arrays = [np.broadcast_to(item, shape) for item in arrays]
+    if len(shape) < 3:
+        raise ValueError("standard-form 3D SOR expects the last three dimensions to be spatial")
+    values = np.empty(shape, dtype=np.float64)
+    optarg = _sor_optarg(iparams, shape[-3:])
+    if len(shape) == 3:
+        solved, relerr, overflow, loops = fishpack.sor_standard3d(
+            arrays[0],
+            arrays[1],
+            arrays[2],
+            arrays[3],
+            arrays[4],
+            dz,
+            dy,
+            dx,
+            bcs[0],
+            bcs[1],
+            bcs[2],
+            optarg,
+            _UNDEF,
+            int(iparams["mxLoop"]),
+            float(iparams["tolerance"]),
+        )
+        if overflow:
+            raise RuntimeError("Fortran SOR standard3d overflowed")
+        values[...] = solved
+        return values
+    for index in np.ndindex(shape[:-3]):
+        solved, relerr, overflow, loops = fishpack.sor_standard3d(
+            arrays[0][index],
+            arrays[1][index],
+            arrays[2][index],
+            arrays[3][index],
+            arrays[4][index],
+            dz,
+            dy,
+            dx,
+            bcs[0],
+            bcs[1],
+            bcs[2],
+            optarg,
+            _UNDEF,
+            int(iparams["mxLoop"]),
+            float(iparams["tolerance"]),
+        )
+        if overflow:
+            raise RuntimeError("Fortran SOR standard3d overflowed")
+        values[index] = solved
+    return values
+
+
 def _invert_general_2d(
     G: Any,
     *,
@@ -1519,8 +1907,8 @@ def _invert_general_2d(
         raise NotImplementedError("general-form SOR currently supports Cartesian coordinates only")
     iparams = _merged_iparams(iParams, ndim=2, BCs=BCs)
     bcs = _normalize_sor_bcs(iparams["BCs"], 2)
-    if _is_xarray_dataarray(G):
-        return _invert_general_2d_xarray(
+    if _is_dataarray(G):
+        return _invert_general_2d_labeled(
             G,
             dims=dims,
             bcs=bcs,
@@ -1540,7 +1928,7 @@ def _invert_general_2d(
     )
 
 
-def _invert_general_2d_xarray(
+def _invert_general_2d_labeled(
     field: Any,
     *,
     dims: Sequence[str] | Sequence[int] | None,
@@ -1556,10 +1944,10 @@ def _invert_general_2d_xarray(
         dims = field.dims[-2:]
     if len(dims) != 2 or not all(isinstance(dim, str) for dim in dims):
         raise TypeError("xarray general-form inversion requires two dimension names")
-    mask_f, init_s, zero = _mask_xarray_field(field, dims, iparams, bcs, icbc)
-    dy, dx = _spacing_for_xarray(mask_f, (dims[0], dims[1]), spacing)
-    coefs = tuple(_as_xarray_like(coef, mask_f) for coef in coefficients)
-    solved = _solve_sor_general2d_xarray(
+    mask_f, init_s, zero = _mask_labeled_field(field, dims, iparams, bcs, icbc)
+    dy, dx = _spacing_for_labeled(mask_f, (dims[0], dims[1]), spacing)
+    coefs = tuple(_as_labeled_like(coef, mask_f) for coef in coefficients)
+    solved = _solve_sor_general2d_labeled(
         init_s,
         *coefs,
         mask_f,
@@ -1569,7 +1957,7 @@ def _invert_general_2d_xarray(
         bcs=bcs,
         iparams=iparams,
     )
-    return _demask_xarray_result(solved, mask_f, iparams, icbc)
+    return _restore_labeled_result(solved, mask_f, iparams, icbc)
 
 
 def _invert_general_2d_ndarray(
@@ -1615,7 +2003,129 @@ def _invert_general_2d_ndarray(
     return np.moveaxis(solved, (-2, -1), axes_tuple)
 
 
-def _solve_sor_general2d_xarray(
+def _invert_general_3d(
+    H: Any,
+    *,
+    dims: Sequence[str] | Sequence[int] | None,
+    coords: str,
+    iParams: dict[str, Any] | None,
+    BCs: Sequence[str] | None,
+    spacing: Sequence[float] | None,
+    icbc: Any,
+    coefficients: tuple[Any, Any, Any, Any, Any, Any, Any],
+) -> Any:
+    if coords != "cartesian":
+        raise NotImplementedError("general-form 3D SOR currently supports Cartesian coordinates only")
+    iparams = _merged_iparams(iParams, ndim=3, BCs=BCs)
+    bcs = _normalize_sor_bcs(iparams["BCs"], 3)
+    if bcs[0] == "periodic" or bcs[1] == "periodic":
+        raise NotImplementedError("general-form 3D SOR currently supports periodic boundaries only in x")
+    if _is_dataarray(H):
+        return _invert_general_3d_labeled(
+            H,
+            dims=dims,
+            bcs=bcs,
+            spacing=spacing,
+            iparams=iparams,
+            icbc=icbc,
+            coefficients=coefficients,
+        )
+    return _invert_general_3d_ndarray(
+        H,
+        axes=dims,
+        bcs=bcs,
+        spacing=spacing,
+        iparams=iparams,
+        icbc=icbc,
+        coefficients=coefficients,
+    )
+
+
+def _invert_general_3d_labeled(
+    field: Any,
+    *,
+    dims: Sequence[str] | Sequence[int] | None,
+    bcs: tuple[str, ...],
+    spacing: Sequence[float] | None,
+    iparams: dict[str, Any],
+    icbc: Any,
+    coefficients: tuple[Any, Any, Any, Any, Any, Any, Any],
+) -> Any:
+    if dims is None:
+        if field.ndim < 3:
+            raise ValueError("dims must be supplied for xarray inputs with fewer than 3 dimensions")
+        dims = field.dims[-3:]
+    if len(dims) != 3 or not all(isinstance(dim, str) for dim in dims):
+        raise TypeError("xarray general-form 3D inversion requires three dimension names")
+    mask_f, init_s, _zero = _mask_labeled_field(field, dims, iparams, bcs, icbc)
+    dz, dy, dx = _spacing_for_labeled3d(mask_f, (dims[0], dims[1], dims[2]), spacing)
+    coefs = tuple(_as_labeled_like(coef, mask_f) for coef in coefficients)
+    solved = _solve_sor_general3d_labeled(
+        init_s,
+        *coefs,
+        mask_f,
+        dims=dims,
+        dz=dz,
+        dy=dy,
+        dx=dx,
+        bcs=bcs,
+        iparams=iparams,
+    )
+    return _restore_labeled_result(solved, mask_f, iparams, icbc)
+
+
+def _invert_general_3d_ndarray(
+    field: Any,
+    *,
+    axes: Sequence[str] | Sequence[int] | None,
+    bcs: tuple[str, ...],
+    spacing: Sequence[float] | None,
+    iparams: dict[str, Any],
+    icbc: Any,
+    coefficients: tuple[Any, Any, Any, Any, Any, Any, Any],
+) -> np.ndarray:
+    arr = np.asarray(field, dtype=np.float64)
+    if arr.ndim < 3:
+        raise ValueError("general-form 3D inversion requires at least a three-dimensional array")
+    if axes is None:
+        axes_tuple = (arr.ndim - 3, arr.ndim - 2, arr.ndim - 1)
+    else:
+        if len(axes) != 3 or not all(isinstance(axis, int) for axis in axes):
+            raise TypeError("NumPy general-form 3D inversion requires three integer axes")
+        axes_tuple = tuple(axis % arr.ndim for axis in axes)
+    if len(set(axes_tuple)) != 3:
+        raise ValueError("inversion axes must be distinct")
+
+    dz, dy, dx = _normalize_spacing3d(spacing)
+    moved = np.moveaxis(arr, axes_tuple, (-3, -2, -1))
+    init = (
+        np.zeros_like(moved)
+        if icbc is None
+        else np.moveaxis(np.asarray(icbc, dtype=np.float64), axes_tuple, (-3, -2, -1))
+    )
+    moved_coefficients = []
+    for coef in coefficients:
+        coef_arr = np.asarray(coef, dtype=np.float64)
+        if coef_arr.ndim == arr.ndim and coef_arr.shape == arr.shape:
+            coef_arr = np.moveaxis(coef_arr, axes_tuple, (-3, -2, -1))
+        moved_coefficients.append(coef_arr)
+    coef_arrays = tuple(
+        _broadcast_ndarray_coefficient(coef, moved.shape) for coef in moved_coefficients
+    )
+    solved = _solve_sor_general3d_batched(
+        init,
+        *coef_arrays,
+        moved,
+        dz=dz,
+        dy=dy,
+        dx=dx,
+        bcs=bcs,
+        iparams=iparams,
+    )
+    return np.moveaxis(solved, (-3, -2, -1), axes_tuple)
+
+
+def _solve_sor_general2d_labeled(
     init_s: Any,
     acoef: Any,
     bcoef: Any,
@@ -1708,6 +2218,363 @@ def _solve_sor_general2d_batched(
     return values
 
 
+def _solve_sor_general3d_labeled(
+    init_s: Any,
+    acoef: Any,
+    bcoef: Any,
+    ccoef: Any,
+    dcoef: Any,
+    ecoef: Any,
+    fcoef: Any,
+    gcoef: Any,
+    force: Any,
+    *,
+    dims: Sequence[str],
+    dz: float,
+    dy: float,
+    dx: float,
+    bcs: tuple[str, ...],
+    iparams: dict[str, Any],
+) -> Any:
+    import xarray as xr
+
+    zdim, ydim, xdim = dims
+    arrays = xr.broadcast(acoef, bcoef, ccoef, dcoef, ecoef, fcoef, gcoef, force, init_s)
+    acoef, bcoef, ccoef, dcoef, ecoef, fcoef, gcoef, force, init_s = arrays
+    outer_dims = tuple(dim for dim in force.dims if dim not in dims)
+    order = (*outer_dims, zdim, ydim, xdim)
+    transposed_force = force.transpose(*order)
+    arrays_np = [
+        item.transpose(*order).values
+        for item in (init_s, acoef, bcoef, ccoef, dcoef, ecoef, fcoef, gcoef, force)
+    ]
+    values = _solve_sor_general3d_batched(
+        arrays_np[0],
+        arrays_np[1],
+        arrays_np[2],
+        arrays_np[3],
+        arrays_np[4],
+        arrays_np[5],
+        arrays_np[6],
+        arrays_np[7],
+        arrays_np[8],
+        dz=dz,
+        dy=dy,
+        dx=dx,
+        bcs=bcs,
+        iparams=iparams,
+    )
+    result = force.__class__(
+        values,
+        coords=transposed_force.coords,
+        dims=transposed_force.dims,
+        attrs=dict(force.attrs),
+        name="inverted",
+    )
+    return result.transpose(*force.dims)
+
+
+def _solve_sor_general3d_batched(
+    init_s: np.ndarray,
+    acoef: np.ndarray,
+    bcoef: np.ndarray,
+    ccoef: np.ndarray,
+    dcoef: np.ndarray,
+    ecoef: np.ndarray,
+    fcoef: np.ndarray,
+    gcoef: np.ndarray,
+    force: np.ndarray,
+    *,
+    dz: float,
+    dy: float,
+    dx: float,
+    bcs: tuple[str, ...],
+    iparams: dict[str, Any],
+) -> np.ndarray:
+    arrays = [
+        np.asarray(item, dtype=np.float64)
+        for item in (init_s, acoef, bcoef, ccoef, dcoef, ecoef, fcoef, gcoef, force)
+    ]
+    shape = np.broadcast_shapes(*(item.shape for item in arrays))
+    arrays = [np.broadcast_to(item, shape) for item in arrays]
+    if len(shape) < 3:
+        raise ValueError("general-form 3D SOR expects the last three dimensions to be spatial")
+    values = np.empty(shape, dtype=np.float64)
+    optarg = _sor_optarg(iparams, shape[-3:])
+    if len(shape) == 3:
+        solved, relerr, overflow, loops = fishpack.sor_general3d(
+            arrays[0],
+            arrays[1],
+            arrays[2],
+            arrays[3],
+            arrays[4],
+            arrays[5],
+            arrays[6],
+            arrays[7],
+            arrays[8],
+            dz,
+            dy,
+            dx,
+            bcs[0],
+            bcs[1],
+            bcs[2],
+            optarg,
+            _UNDEF,
+            int(iparams["mxLoop"]),
+            float(iparams["tolerance"]),
+        )
+        if overflow:
+            raise RuntimeError("Fortran SOR general3d overflowed")
+        values[...] = solved
+        return values
+    for index in np.ndindex(shape[:-3]):
+        solved, relerr, overflow, loops = fishpack.sor_general3d(
+            arrays[0][index],
+            arrays[1][index],
+            arrays[2][index],
+            arrays[3][index],
+            arrays[4][index],
+            arrays[5][index],
+            arrays[6][index],
+            arrays[7][index],
+            arrays[8][index],
+            dz,
+            dy,
+            dx,
+            bcs[0],
+            bcs[1],
+            bcs[2],
+            optarg,
+            _UNDEF,
+            int(iparams["mxLoop"]),
+            float(iparams["tolerance"]),
+        )
+        if overflow:
+            raise RuntimeError("Fortran SOR general3d overflowed")
+        values[index] = solved
+    return values
+
+
+def _invert_biharmonic_2d(
+    J: Any,
+    *,
+    dims: Sequence[str] | Sequence[int] | None,
+    coords: str,
+    iParams: dict[str, Any] | None,
+    BCs: Sequence[str] | None,
+    spacing: Sequence[float] | None,
+    icbc: Any,
+    coefficients: tuple[Any, Any, Any, Any, Any, Any, Any, Any, Any],
+) -> Any:
+    if coords != "cartesian":
+        raise NotImplementedError("biharmonic SOR currently supports Cartesian coordinates only")
+    iparams = _merged_iparams(iParams, ndim=2, BCs=BCs)
+    bcs = _normalize_sor_bcs(iparams["BCs"], 2)
+    if _is_dataarray(J):
+        return _invert_biharmonic_2d_labeled(
+            J,
+            dims=dims,
+            bcs=bcs,
+            spacing=spacing,
+            iparams=iparams,
+            icbc=icbc,
+            coefficients=coefficients,
+        )
+    return _invert_biharmonic_2d_ndarray(
+        J,
+        axes=dims,
+        bcs=bcs,
+        spacing=spacing,
+        iparams=iparams,
+        icbc=icbc,
+        coefficients=coefficients,
+    )
+
+
+def _invert_biharmonic_2d_labeled(
+    field: Any,
+    *,
+    dims: Sequence[str] | Sequence[int] | None,
+    bcs: tuple[str, ...],
+    spacing: Sequence[float] | None,
+    iparams: dict[str, Any],
+    icbc: Any,
+    coefficients: tuple[Any, Any, Any, Any, Any, Any, Any, Any, Any],
+) -> Any:
+    if dims is None:
+        if field.ndim < 2:
+            raise ValueError("dims must be supplied for xarray inputs with fewer than 2 dimensions")
+        dims = field.dims[-2:]
+    if len(dims) != 2 or not all(isinstance(dim, str) for dim in dims):
+        raise TypeError("xarray biharmonic inversion requires two dimension names")
+    mask_f, init_s, _zero = _mask_labeled_field(field, dims, iparams, bcs, icbc)
+    dy, dx = _spacing_for_labeled(mask_f, (dims[0], dims[1]), spacing)
+    coefs = tuple(_as_labeled_like(coef, mask_f) for coef in coefficients)
+    solved = _solve_sor_biharmonic2d_labeled(
+        init_s,
+        *coefs,
+        mask_f,
+        dims=dims,
+        dy=dy,
+        dx=dx,
+        bcs=bcs,
+        iparams=iparams,
+    )
+    return _restore_labeled_result(solved, mask_f, iparams, icbc)
+
+
+def _invert_biharmonic_2d_ndarray(
+    field: Any,
+    *,
+    axes: Sequence[str] | Sequence[int] | None,
+    bcs: tuple[str, ...],
+    spacing: Sequence[float] | None,
+    iparams: dict[str, Any],
+    icbc: Any,
+    coefficients: tuple[Any, Any, Any, Any, Any, Any, Any, Any, Any],
+) -> np.ndarray:
+    arr = np.asarray(field, dtype=np.float64)
+    if arr.ndim < 2:
+        raise ValueError("biharmonic inversion requires at least a two-dimensional array")
+    if axes is None:
+        axes_tuple = (arr.ndim - 2, arr.ndim - 1)
+    else:
+        if len(axes) != 2 or not all(isinstance(axis, int) for axis in axes):
+            raise TypeError("NumPy biharmonic inversion requires two integer axes")
+        axes_tuple = tuple(axis % arr.ndim for axis in axes)
+    if axes_tuple[0] == axes_tuple[1]:
+        raise ValueError("inversion axes must be distinct")
+    dy, dx = _normalize_spacing(spacing)
+    moved = np.moveaxis(arr, axes_tuple, (-2, -1))
+    init = np.zeros_like(moved) if icbc is None else np.moveaxis(np.asarray(icbc, dtype=np.float64), axes_tuple, (-2, -1))
+    moved_coefficients = []
+    for coef in coefficients:
+        coef_arr = np.asarray(coef, dtype=np.float64)
+        if coef_arr.ndim == arr.ndim and coef_arr.shape == arr.shape:
+            coef_arr = np.moveaxis(coef_arr, axes_tuple, (-2, -1))
+        moved_coefficients.append(coef_arr)
+    coef_arrays = tuple(_broadcast_ndarray_coefficient(coef, moved.shape) for coef in moved_coefficients)
+    solved = _solve_sor_biharmonic2d_batched(
+        init,
+        *coef_arrays,
+        moved,
+        dy=dy,
+        dx=dx,
+        bcs=bcs,
+        iparams=iparams,
+    )
+    return np.moveaxis(solved, (-2, -1), axes_tuple)
+
+
+def _solve_sor_biharmonic2d_labeled(
+    init_s: Any,
+    acoef: Any,
+    bcoef: Any,
+    ccoef: Any,
+    dcoef: Any,
+    ecoef: Any,
+    fcoef: Any,
+    gcoef: Any,
+    hcoef: Any,
+    icoef: Any,
+    force: Any,
+    *,
+    dims: Sequence[str],
+    dy: float,
+    dx: float,
+    bcs: tuple[str, ...],
+    iparams: dict[str, Any],
+) -> Any:
+    import xarray as xr
+
+    ydim, xdim = dims
+    arrays = xr.broadcast(acoef, bcoef, ccoef, dcoef, ecoef, fcoef, gcoef, hcoef, icoef, force, init_s)
+    acoef, bcoef, ccoef, dcoef, ecoef, fcoef, gcoef, hcoef, icoef, force, init_s = arrays
+    outer_dims = tuple(dim for dim in force.dims if dim not in dims)
+    order = (*outer_dims, ydim, xdim)
+    arrays_np = [
+        item.transpose(*order).values
+        for item in (init_s, acoef, bcoef, ccoef, dcoef, ecoef, fcoef, gcoef, hcoef, icoef, force)
+    ]
+    values = _solve_sor_biharmonic2d_batched(
+        arrays_np[0],
+        arrays_np[1],
+        arrays_np[2],
+        arrays_np[3],
+        arrays_np[4],
+        arrays_np[5],
+        arrays_np[6],
+        arrays_np[7],
+        arrays_np[8],
+        arrays_np[9],
+        arrays_np[10],
+        dy=dy,
+        dx=dx,
+        bcs=bcs,
+        iparams=iparams,
+    )
+    template = force.transpose(*order)
+    result = force.__class__(
+        values,
+        coords=template.coords,
+        dims=template.dims,
+        attrs=dict(force.attrs),
+        name="inverted",
+    )
+    return result.transpose(*force.dims)
+
+
+def _solve_sor_biharmonic2d_batched(
+    init_s: np.ndarray,
+    acoef: np.ndarray,
+    bcoef: np.ndarray,
+    ccoef: np.ndarray,
+    dcoef: np.ndarray,
+    ecoef: np.ndarray,
+    fcoef: np.ndarray,
+    gcoef: np.ndarray,
+    hcoef: np.ndarray,
+    icoef: np.ndarray,
+    force: np.ndarray,
+    *,
+    dy: float,
+    dx: float,
+    bcs: tuple[str, ...],
+    iparams: dict[str, Any],
+) -> np.ndarray:
+    arrays = [
+        np.asarray(item, dtype=np.float64)
+        for item in (init_s, acoef, bcoef, ccoef, dcoef, ecoef, fcoef, gcoef, hcoef, icoef, force)
+    ]
+    shape = np.broadcast_shapes(*(item.shape for item in arrays))
+    arrays = [np.broadcast_to(item, shape) for item in arrays]
+    if len(shape) < 2:
+        raise ValueError("biharmonic SOR expects the last two dimensions to be spatial")
+    values = np.empty(shape, dtype=np.float64)
+    optarg = _sor_optarg(iparams, shape[-2:])
+    if len(shape) == 2:
+        solved, relerr, overflow, loops = fishpack.sor_biharmonic2d(
+            arrays[0], arrays[1], arrays[2], arrays[3], arrays[4], arrays[5],
+            arrays[6], arrays[7], arrays[8], arrays[9], arrays[10],
+            dy, dx, bcs[0], bcs[1], optarg, _UNDEF, int(iparams["mxLoop"]), float(iparams["tolerance"])
+        )
+        if overflow:
+            raise RuntimeError("Fortran SOR biharmonic2d overflowed")
+        values[...] = solved
+        return values
+    for index in np.ndindex(shape[:-2]):
+        solved, relerr, overflow, loops = fishpack.sor_biharmonic2d(
+            arrays[0][index], arrays[1][index], arrays[2][index], arrays[3][index],
+            arrays[4][index], arrays[5][index], arrays[6][index], arrays[7][index],
+            arrays[8][index], arrays[9][index], arrays[10][index],
+            dy, dx, bcs[0], bcs[1], optarg, _UNDEF, int(iparams["mxLoop"]), float(iparams["tolerance"])
+        )
+        if overflow:
+            raise RuntimeError("Fortran SOR biharmonic2d overflowed")
+        values[index] = solved
+    return values
+
+
 def _broadcast_ndarray_coefficient(coef: Any, shape: tuple[int, ...]) -> np.ndarray:
     arr = np.asarray(coef, dtype=np.float64)
     if arr.ndim == 0:
@@ -1715,7 +2582,7 @@ def _broadcast_ndarray_coefficient(coef: Any, shape: tuple[int, ...]) -> np.ndar
     return np.broadcast_to(arr, shape).astype(np.float64, copy=False)
 
 
-def _solve_sor1d_xarray(
+def _solve_sor1d_labeled(
     init_s: Any,
     acoef: Any,
     bcoef: Any,
@@ -1794,8 +2661,14 @@ def _sor_optarg(iparams: dict[str, Any], shape: tuple[int, ...]) -> float:
             np.sin(np.pi / (2.0 * shape[1] + 2.0)) ** 2
             + np.sin(np.pi / (2.0 * shape[0] + 2.0)) ** 2
         )
+    elif len(shape) == 3:
+        epsilon = (
+            np.sin(np.pi / (2.0 * shape[2] + 2.0)) ** 2
+            + np.sin(np.pi / (2.0 * shape[1] + 2.0)) ** 2
+            + np.sin(np.pi / (2.0 * shape[0] + 2.0)) ** 2
+        )
     else:
-        raise ValueError("SOR optArg supports one or two dimensions")
+        raise ValueError("SOR optArg supports one, two, or three dimensions")
     return float(2.0 / (1.0 + np.sqrt((2.0 - epsilon) * epsilon)))
 
 
@@ -1815,8 +2688,8 @@ def _sor_spacing1d(field: Any, dim: str, coords: str, rearth: float) -> float:
     return dx
 
 
-def _as_xarray_like(value: Any, template: Any) -> Any:
-    if _is_xarray_dataarray(value):
+def _as_labeled_like(value: Any, template: Any) -> Any:
+    if _is_dataarray(value):
         return value
     return (template * 0.0) + value
 
@@ -1870,8 +2743,8 @@ def _invert_constant_2d(
         raise NotImplementedError("only Cartesian constant-coefficient equations are supported")
     params = dict(iParams or {})
     bcs = _normalize_bcs(BCs if BCs is not None else params.get("BCs", None))
-    if _is_xarray_dataarray(F):
-        return _invert_constant_2d_xarray(
+    if _is_dataarray(F):
+        return _invert_constant_2d_labeled(
             F,
             dims=dims,
             bcs=bcs,
@@ -1906,8 +2779,8 @@ def _invert_constant_3d(
         raise NotImplementedError("only Cartesian constant-coefficient 3D equations are supported")
     params = dict(iParams or {})
     bcs = _normalize_bcs_n(BCs if BCs is not None else params.get("BCs", None), 3)
-    if _is_xarray_dataarray(F):
-        return _invert_constant_3d_xarray(
+    if _is_dataarray(F):
+        return _invert_constant_3d_labeled(
             F,
             dims=dims,
             bcs=bcs,
@@ -1925,7 +2798,7 @@ def _invert_constant_3d(
     )
 
 
-def _invert_poisson_xarray(
+def _invert_poisson_labeled(
     field: Any,
     *,
     dims: Sequence[str] | Sequence[int] | None,
@@ -1946,7 +2819,7 @@ def _invert_poisson_xarray(
         raise ValueError(f"dims not present in input DataArray: {missing}")
 
     ydim, xdim = dims
-    dy, dx = _spacing_for_xarray(field, (ydim, xdim), spacing)
+    dy, dx = _spacing_for_labeled(field, (ydim, xdim), spacing)
     outer_dims = tuple(dim for dim in field.dims if dim not in dims)
     transposed = field.transpose(*outer_dims, ydim, xdim)
 
@@ -1998,7 +2871,7 @@ def _invert_poisson_ndarray(
     return np.moveaxis(solved, (-2, -1), axes_tuple)
 
 
-def _invert_constant_2d_xarray(
+def _invert_constant_2d_labeled(
     field: Any,
     *,
     dims: Sequence[str] | Sequence[int] | None,
@@ -2021,7 +2894,7 @@ def _invert_constant_2d_xarray(
         raise ValueError(f"dims not present in input DataArray: {missing}")
 
     ydim, xdim = dims
-    dy, dx = _spacing_for_xarray(field, (ydim, xdim), spacing)
+    dy, dx = _spacing_for_labeled(field, (ydim, xdim), spacing)
     outer_dims = tuple(dim for dim in field.dims if dim not in dims)
     transposed = field.transpose(*outer_dims, ydim, xdim)
     values = _solve_constant_2d_batched(
@@ -2081,7 +2954,7 @@ def _invert_constant_2d_ndarray(
     return np.moveaxis(solved, (-2, -1), axes_tuple)
 
 
-def _invert_constant_3d_xarray(
+def _invert_constant_3d_labeled(
     field: Any,
     *,
     dims: Sequence[str] | Sequence[int] | None,
@@ -2103,7 +2976,7 @@ def _invert_constant_3d_xarray(
         raise ValueError(f"dims not present in input DataArray: {missing}")
 
     zdim, ydim, xdim = dims
-    dz, dy, dx = _spacing_for_xarray3d(field, (zdim, ydim, xdim), spacing)
+    dz, dy, dx = _spacing_for_labeled3d(field, (zdim, ydim, xdim), spacing)
     outer_dims = tuple(dim for dim in field.dims if dim not in dims)
     transposed = field.transpose(*outer_dims, zdim, ydim, xdim)
     values = _solve_constant_3d_batched(
@@ -2460,7 +3333,7 @@ def _cartesian_coriolis_forcing(
     offset: float,
 ) -> Any:
     coriolis = _cartesian_coriolis_field(field, dims, spacing, params)
-    if _is_xarray_dataarray(field):
+    if _is_dataarray(field):
         return (field * 0.0) + offset + sign * coriolis
     return offset + sign * np.asarray(coriolis, dtype=np.float64)
 
@@ -2475,7 +3348,7 @@ def _cartesian_coriolis_field(
     beta = float(params["beta"])
     if beta == 0.0:
         return _like_field(field, f0)
-    if _is_xarray_dataarray(field):
+    if _is_dataarray(field):
         if dims is None:
             if field.ndim < 2:
                 raise ValueError("dims must be supplied for xarray inputs with fewer than 2 dimensions")
@@ -2511,7 +3384,7 @@ def _cartesian_geostrophic_coefficients(
     f0: float,
     beta: float,
 ) -> tuple[Any, Any, Any]:
-    if _is_xarray_dataarray(field):
+    if _is_dataarray(field):
         if dims is None:
             if field.ndim < 2:
                 raise ValueError("dims must be supplied for xarray inputs with fewer than 2 dimensions")
@@ -2559,7 +3432,7 @@ def _cartesian_beta_general_coefficients(
     scale: float,
     helmholtz: float,
 ) -> tuple[Any, Any, Any, Any, Any, Any]:
-    if _is_xarray_dataarray(field):
+    if _is_dataarray(field):
         if dims is None:
             if field.ndim < 2:
                 raise ValueError("dims must be supplied for xarray inputs with fewer than 2 dimensions")
@@ -2609,8 +3482,105 @@ def _cartesian_beta_general_coefficients(
     )
 
 
+def _cartesian_omega_coefficients(
+    field: Any,
+    *,
+    dims: Sequence[str] | Sequence[int] | None,
+    spacing: Sequence[float] | None,
+    f0: float,
+    beta: float,
+    n2: float,
+) -> tuple[Any, Any, Any]:
+    if _is_dataarray(field):
+        if dims is None:
+            if field.ndim < 3:
+                raise ValueError("dims must be supplied for xarray inputs with fewer than 3 dimensions")
+            dims = field.dims[-3:]
+        if len(dims) != 3 or not all(isinstance(dim, str) for dim in dims):
+            raise TypeError("xarray omega beta-plane inversion requires three dimension names")
+        y = field.coords[dims[1]]
+        f = f0 + beta * y
+        return f * f, n2, n2
+
+    arr = np.asarray(field, dtype=np.float64)
+    if arr.ndim < 3:
+        raise ValueError("omega beta-plane inversion requires at least a three-dimensional array")
+    if dims is None:
+        yaxis = arr.ndim - 2
+    else:
+        if len(dims) != 3 or not all(isinstance(axis, int) for axis in dims):
+            raise TypeError("NumPy omega beta-plane inversion requires three integer axes")
+        yaxis = int(dims[1]) % arr.ndim
+    _, dy, _ = _normalize_spacing3d(spacing)
+    y = np.arange(arr.shape[yaxis], dtype=np.float64) * dy
+    shape = [1] * arr.ndim
+    shape[yaxis] = arr.shape[yaxis]
+    acoef = (f0 + beta * y.reshape(shape)) ** 2
+    return (
+        np.broadcast_to(acoef, arr.shape),
+        n2,
+        n2,
+    )
+
+
+def _cartesian_3d_ocean_coefficients(
+    field: Any,
+    *,
+    dims: Sequence[str] | Sequence[int] | None,
+    spacing: Sequence[float] | None,
+    epsilon: float,
+    f0: float,
+    beta: float,
+    n2: float,
+    buoyancy_damping: float,
+) -> tuple[Any, Any, Any, Any, Any, Any, Any]:
+    vertical = buoyancy_damping / n2
+    if _is_dataarray(field):
+        if dims is None:
+            if field.ndim < 3:
+                raise ValueError("dims must be supplied for xarray inputs with fewer than 3 dimensions")
+            dims = field.dims[-3:]
+        if len(dims) != 3 or not all(isinstance(dim, str) for dim in dims):
+            raise TypeError("xarray 3DOcean beta-plane inversion requires three dimension names")
+        y = field.coords[dims[1]]
+        f = f0 + beta * y
+        denom = epsilon * epsilon + f * f
+        c1 = epsilon / denom
+        c1_dy = -2.0 * epsilon * f * beta / (denom * denom)
+        c2_dy = beta * (epsilon * epsilon - f * f) / (denom * denom)
+        return vertical, c1, c1, 0.0, c1_dy, -c2_dy, 0.0
+
+    arr = np.asarray(field, dtype=np.float64)
+    if arr.ndim < 3:
+        raise ValueError("3DOcean beta-plane inversion requires at least a three-dimensional array")
+    if dims is None:
+        yaxis = arr.ndim - 2
+    else:
+        if len(dims) != 3 or not all(isinstance(axis, int) for axis in dims):
+            raise TypeError("NumPy 3DOcean beta-plane inversion requires three integer axes")
+        yaxis = int(dims[1]) % arr.ndim
+    _, dy, _ = _normalize_spacing3d(spacing)
+    y = np.arange(arr.shape[yaxis], dtype=np.float64) * dy
+    shape = [1] * arr.ndim
+    shape[yaxis] = arr.shape[yaxis]
+    f = f0 + beta * y.reshape(shape)
+    denom = epsilon * epsilon + f * f
+    c1 = epsilon / denom
+    c1_dy = -2.0 * epsilon * f * beta / (denom * denom)
+    c2_dy = beta * (epsilon * epsilon - f * f) / (denom * denom)
+    return (
+        vertical,
+        np.broadcast_to(c1, arr.shape),
+        np.broadcast_to(c1, arr.shape),
+        0.0,
+        np.broadcast_to(c1_dy, arr.shape),
+        np.broadcast_to(-c2_dy, arr.shape),
+        0.0,
+    )
+
+
 def _like_field(field: Any, value: float) -> Any:
-    if _is_xarray_dataarray(field):
+    if _is_dataarray(field):
         return (field * 0.0) + value
     return np.zeros_like(np.asarray(field, dtype=np.float64)) + value
 
@@ -2637,7 +3607,7 @@ def _normalize_spacing3d(spacing: Sequence[float] | None) -> tuple[float, float,
     return dz, dy, dx
 
 
-def _spacing_for_xarray(
+def _spacing_for_labeled(
     field: Any, dims: tuple[str, str], spacing: Sequence[float] | None
 ) -> tuple[float, float]:
     if spacing is not None:
@@ -2645,7 +3615,7 @@ def _spacing_for_xarray(
     return tuple(_uniform_coord_spacing(field.coords[dim].values, dim) for dim in dims)  # type: ignore[return-value]
 
 
-def _spacing_for_xarray3d(
+def _spacing_for_labeled3d(
     field: Any, dims: tuple[str, str, str], spacing: Sequence[float] | None
 ) -> tuple[float, float, float]:
     if spacing is not None:
@@ -2666,5 +3636,5 @@ def _uniform_coord_spacing(coord: Any, dim: str) -> float:
     return abs(delta)
 
 
-def _is_xarray_dataarray(obj: Any) -> bool:
+def _is_dataarray(obj: Any) -> bool:
     return obj.__class__.__module__.startswith("xarray.") and hasattr(obj, "dims")

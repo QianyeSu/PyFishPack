@@ -28,6 +28,7 @@ try:
         invert_Stommel_test,
         invert_geostrophic,
         invert_omega,
+        spectral_transform,
     )
 
     # Make commonly used functions available at package level
@@ -53,6 +54,7 @@ try:
         "invert_Stommel_test",
         "invert_geostrophic",
         "invert_omega",
+        "spectral_transform",
     ])
 
 except ImportError as e:

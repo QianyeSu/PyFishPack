@@ -92,12 +92,34 @@ extern void pyfp_sor_standard2d(int ny, int nx, void *s, void *a, void *b,
                                 int bcy, int bcx, double optarg, double undef,
                                 int mxloop, double tolerance, int *overflow,
                                 double *relerr, int *loops);
+extern void pyfp_sor_standard3d(int nz, int ny, int nx, void *s, void *a,
+                                void *b, void *c, void *f, double delz,
+                                double dely, double delx, int bcz, int bcy,
+                                int bcx, double optarg, double undef,
+                                int mxloop, double tolerance, int *overflow,
+                                double *relerr, int *loops);
 extern void pyfp_sor_general2d(int ny, int nx, void *s, void *a, void *b,
                                void *c, void *d, void *e, void *fcoef, void *g,
                                double dely, double delx, int bcy, int bcx,
                                double optarg, double undef, int mxloop,
                                double tolerance, int *overflow, double *relerr,
                                int *loops);
+extern void pyfp_sor_general3d(int nz, int ny, int nx, void *s, void *a,
+                               void *b, void *c, void *d, void *e,
+                               void *fcoef, void *g, void *h, double delz,
+                               double dely, double delx, int bcz, int bcy,
+                               int bcx, double optarg, double undef,
+                               int mxloop, double tolerance, int *overflow,
+                               double *relerr, int *loops);
+extern void pyfp_sor_biharmonic2d(int ny, int nx, void *s, void *a, void *b,
+                                  void *c, void *d, void *e, void *fcoef,
+                                  void *g, void *h, void *icoef, void *jcoef,
+                                  double dely, double delx, int bcy, int bcx,
+                                  double optarg, double undef, int mxloop,
+                                  double tolerance, int *overflow,
+                                  double *relerr, int *loops);
+extern void pyfp_fftpack_real_transform(int n, void *x, int kind, int direction);
+extern void pyfp_fftpack_complex_transform(int n, void *c, int direction);
 
 static PyArrayObject *as_double_1d(PyObject *obj, const char *name)
 {
@@ -151,6 +173,20 @@ static int require_2d_shape(PyArrayObject *arr, npy_intp dim0, npy_intp dim1, co
                      name,
                      (Py_ssize_t)PyArray_DIM(arr, 0), (Py_ssize_t)PyArray_DIM(arr, 1),
                      (Py_ssize_t)dim0, (Py_ssize_t)dim1);
+        return 0;
+    }
+    return 1;
+}
+
+static int require_3d_shape(PyArrayObject *arr, npy_intp dim0, npy_intp dim1, npy_intp dim2, const char *name)
+{
+    if (PyArray_DIM(arr, 0) < dim0 || PyArray_DIM(arr, 1) < dim1 ||
+        PyArray_DIM(arr, 2) < dim2) {
+        PyErr_Format(PyExc_ValueError, "%s has shape (%zd, %zd, %zd), expected at least (%zd, %zd, %zd)",
+                     name,
+                     (Py_ssize_t)PyArray_DIM(arr, 0), (Py_ssize_t)PyArray_DIM(arr, 1),
+                     (Py_ssize_t)PyArray_DIM(arr, 2),
+                     (Py_ssize_t)dim0, (Py_ssize_t)dim1, (Py_ssize_t)dim2);
         return 0;
     }
     return 1;
@@ -717,6 +753,71 @@ fail:
     return NULL;
 }
 
+static PyObject *fishpack_sor_standard3d(PyObject *self, PyObject *args)
+{
+    (void)self;
+    PyObject *s_obj, *a_obj, *b_obj, *c_obj, *f_obj;
+    PyArrayObject *s = NULL, *a = NULL, *b = NULL, *c = NULL, *f = NULL;
+    const char *bcz_name, *bcy_name, *bcx_name;
+    int bcz, bcy, bcx, mxloop, overflow = 0, loops = 0;
+    double delz, dely, delx, optarg, undef, tolerance, relerr = 1.0;
+
+    if (!PyArg_ParseTuple(args, "OOOOOdddsssddid:sor_standard3d",
+                          &s_obj, &a_obj, &b_obj, &c_obj, &f_obj,
+                          &delz, &dely, &delx, &bcz_name, &bcy_name, &bcx_name,
+                          &optarg, &undef, &mxloop, &tolerance)) {
+        return NULL;
+    }
+
+    bcz = bc_code_from_string(bcz_name, "bcz");
+    bcy = bc_code_from_string(bcy_name, "bcy");
+    bcx = bc_code_from_string(bcx_name, "bcx");
+    if (bcz < 0 || bcy < 0 || bcx < 0) {
+        return NULL;
+    }
+
+    s = as_fortran_double_copy(s_obj, 3, "s");
+    a = as_fortran_double_copy(a_obj, 3, "a");
+    b = as_fortran_double_copy(b_obj, 3, "b");
+    c = as_fortran_double_copy(c_obj, 3, "c");
+    f = as_fortran_double_copy(f_obj, 3, "f");
+    if (s == NULL || a == NULL || b == NULL || c == NULL || f == NULL) {
+        goto fail;
+    }
+
+    const npy_intp nz = PyArray_DIM(s, 0);
+    const npy_intp ny = PyArray_DIM(s, 1);
+    const npy_intp nx = PyArray_DIM(s, 2);
+    if (!require_3d_shape(a, nz, ny, nx, "a") || !require_3d_shape(b, nz, ny, nx, "b") ||
+        !require_3d_shape(c, nz, ny, nx, "c") || !require_3d_shape(f, nz, ny, nx, "f")) {
+        goto fail;
+    }
+    if (nz < 3 || ny < 3 || nx < 3) {
+        PyErr_SetString(PyExc_ValueError, "sor_standard3d requires at least a 3 by 3 by 3 grid");
+        goto fail;
+    }
+
+    pyfp_sor_standard3d((int)nz, (int)ny, (int)nx, PyArray_DATA(s),
+                        PyArray_DATA(a), PyArray_DATA(b), PyArray_DATA(c),
+                        PyArray_DATA(f), delz, dely, delx, bcz, bcy, bcx,
+                        optarg, undef, mxloop, tolerance, &overflow, &relerr,
+                        &loops);
+
+    Py_DECREF(a);
+    Py_DECREF(b);
+    Py_DECREF(c);
+    Py_DECREF(f);
+    return Py_BuildValue("Ndii", (PyObject *)s, relerr, overflow, loops);
+
+fail:
+    Py_XDECREF(s);
+    Py_XDECREF(a);
+    Py_XDECREF(b);
+    Py_XDECREF(c);
+    Py_XDECREF(f);
+    return NULL;
+}
+
 static PyObject *fishpack_sor_general2d(PyObject *self, PyObject *args)
 {
     (void)self;
@@ -791,6 +892,285 @@ fail:
     Py_XDECREF(fcoef);
     Py_XDECREF(g);
     return NULL;
+}
+
+static PyObject *fishpack_sor_general3d(PyObject *self, PyObject *args)
+{
+    (void)self;
+    PyObject *s_obj, *a_obj, *b_obj, *c_obj, *d_obj, *e_obj, *fcoef_obj, *g_obj, *h_obj;
+    PyArrayObject *s = NULL, *a = NULL, *b = NULL, *c = NULL;
+    PyArrayObject *d = NULL, *e = NULL, *fcoef = NULL, *g = NULL, *h = NULL;
+    const char *bcz_name, *bcy_name, *bcx_name;
+    int bcz, bcy, bcx, mxloop, overflow = 0, loops = 0;
+    double delz, dely, delx, optarg, undef, tolerance, relerr = 1.0;
+
+    if (!PyArg_ParseTuple(args, "OOOOOOOOOdddsssddid:sor_general3d",
+                          &s_obj, &a_obj, &b_obj, &c_obj, &d_obj, &e_obj,
+                          &fcoef_obj, &g_obj, &h_obj, &delz, &dely, &delx,
+                          &bcz_name, &bcy_name, &bcx_name, &optarg, &undef,
+                          &mxloop, &tolerance)) {
+        return NULL;
+    }
+
+    bcz = bc_code_from_string(bcz_name, "bcz");
+    bcy = bc_code_from_string(bcy_name, "bcy");
+    bcx = bc_code_from_string(bcx_name, "bcx");
+    if (bcz < 0 || bcy < 0 || bcx < 0) {
+        return NULL;
+    }
+
+    s = as_fortran_double_copy(s_obj, 3, "s");
+    a = as_fortran_double_copy(a_obj, 3, "a");
+    b = as_fortran_double_copy(b_obj, 3, "b");
+    c = as_fortran_double_copy(c_obj, 3, "c");
+    d = as_fortran_double_copy(d_obj, 3, "d");
+    e = as_fortran_double_copy(e_obj, 3, "e");
+    fcoef = as_fortran_double_copy(fcoef_obj, 3, "fcoef");
+    g = as_fortran_double_copy(g_obj, 3, "g");
+    h = as_fortran_double_copy(h_obj, 3, "h");
+    if (s == NULL || a == NULL || b == NULL || c == NULL || d == NULL ||
+        e == NULL || fcoef == NULL || g == NULL || h == NULL) {
+        goto fail;
+    }
+
+    const npy_intp nz = PyArray_DIM(s, 0);
+    const npy_intp ny = PyArray_DIM(s, 1);
+    const npy_intp nx = PyArray_DIM(s, 2);
+    if (!require_3d_shape(a, nz, ny, nx, "a") || !require_3d_shape(b, nz, ny, nx, "b") ||
+        !require_3d_shape(c, nz, ny, nx, "c") || !require_3d_shape(d, nz, ny, nx, "d") ||
+        !require_3d_shape(e, nz, ny, nx, "e") ||
+        !require_3d_shape(fcoef, nz, ny, nx, "fcoef") ||
+        !require_3d_shape(g, nz, ny, nx, "g") || !require_3d_shape(h, nz, ny, nx, "h")) {
+        goto fail;
+    }
+    if (nz < 3 || ny < 3 || nx < 3) {
+        PyErr_SetString(PyExc_ValueError, "sor_general3d requires at least a 3 by 3 by 3 grid");
+        goto fail;
+    }
+
+    pyfp_sor_general3d((int)nz, (int)ny, (int)nx, PyArray_DATA(s),
+                       PyArray_DATA(a), PyArray_DATA(b), PyArray_DATA(c),
+                       PyArray_DATA(d), PyArray_DATA(e), PyArray_DATA(fcoef),
+                       PyArray_DATA(g), PyArray_DATA(h), delz, dely, delx,
+                       bcz, bcy, bcx, optarg, undef, mxloop, tolerance,
+                       &overflow, &relerr, &loops);
+
+    Py_DECREF(a);
+    Py_DECREF(b);
+    Py_DECREF(c);
+    Py_DECREF(d);
+    Py_DECREF(e);
+    Py_DECREF(fcoef);
+    Py_DECREF(g);
+    Py_DECREF(h);
+    return Py_BuildValue("Ndii", (PyObject *)s, relerr, overflow, loops);
+
+fail:
+    Py_XDECREF(s);
+    Py_XDECREF(a);
+    Py_XDECREF(b);
+    Py_XDECREF(c);
+    Py_XDECREF(d);
+    Py_XDECREF(e);
+    Py_XDECREF(fcoef);
+    Py_XDECREF(g);
+    Py_XDECREF(h);
+    return NULL;
+}
+
+static PyObject *fishpack_sor_biharmonic2d(PyObject *self, PyObject *args)
+{
+    (void)self;
+    PyObject *s_obj, *a_obj, *b_obj, *c_obj, *d_obj, *e_obj, *fcoef_obj;
+    PyObject *g_obj, *h_obj, *icoef_obj, *jcoef_obj;
+    PyArrayObject *s = NULL, *a = NULL, *b = NULL, *c = NULL, *d = NULL;
+    PyArrayObject *e = NULL, *fcoef = NULL, *g = NULL, *h = NULL;
+    PyArrayObject *icoef = NULL, *jcoef = NULL;
+    const char *bcy_name, *bcx_name;
+    int bcy, bcx, mxloop, overflow = 0, loops = 0;
+    double dely, delx, optarg, undef, tolerance, relerr = 1.0;
+
+    if (!PyArg_ParseTuple(args, "OOOOOOOOOOOddssddid:sor_biharmonic2d",
+                          &s_obj, &a_obj, &b_obj, &c_obj, &d_obj, &e_obj,
+                          &fcoef_obj, &g_obj, &h_obj, &icoef_obj, &jcoef_obj,
+                          &dely, &delx, &bcy_name, &bcx_name, &optarg,
+                          &undef, &mxloop, &tolerance)) {
+        return NULL;
+    }
+
+    bcy = bc_code_from_string(bcy_name, "bcy");
+    bcx = bc_code_from_string(bcx_name, "bcx");
+    if (bcy < 0 || bcx < 0) {
+        return NULL;
+    }
+
+    s = as_fortran_double_copy(s_obj, 2, "s");
+    a = as_fortran_double_copy(a_obj, 2, "a");
+    b = as_fortran_double_copy(b_obj, 2, "b");
+    c = as_fortran_double_copy(c_obj, 2, "c");
+    d = as_fortran_double_copy(d_obj, 2, "d");
+    e = as_fortran_double_copy(e_obj, 2, "e");
+    fcoef = as_fortran_double_copy(fcoef_obj, 2, "fcoef");
+    g = as_fortran_double_copy(g_obj, 2, "g");
+    h = as_fortran_double_copy(h_obj, 2, "h");
+    icoef = as_fortran_double_copy(icoef_obj, 2, "icoef");
+    jcoef = as_fortran_double_copy(jcoef_obj, 2, "jcoef");
+    if (s == NULL || a == NULL || b == NULL || c == NULL || d == NULL ||
+        e == NULL || fcoef == NULL || g == NULL || h == NULL ||
+        icoef == NULL || jcoef == NULL) {
+        goto fail;
+    }
+
+    const npy_intp ny = PyArray_DIM(s, 0);
+    const npy_intp nx = PyArray_DIM(s, 1);
+    if (!require_2d_shape(a, ny, nx, "a") || !require_2d_shape(b, ny, nx, "b") ||
+        !require_2d_shape(c, ny, nx, "c") || !require_2d_shape(d, ny, nx, "d") ||
+        !require_2d_shape(e, ny, nx, "e") || !require_2d_shape(fcoef, ny, nx, "fcoef") ||
+        !require_2d_shape(g, ny, nx, "g") || !require_2d_shape(h, ny, nx, "h") ||
+        !require_2d_shape(icoef, ny, nx, "icoef") || !require_2d_shape(jcoef, ny, nx, "jcoef")) {
+        goto fail;
+    }
+    if (ny < 5 || nx < 5) {
+        PyErr_SetString(PyExc_ValueError, "sor_biharmonic2d requires at least a 5 by 5 grid");
+        goto fail;
+    }
+
+    pyfp_sor_biharmonic2d((int)ny, (int)nx, PyArray_DATA(s),
+                          PyArray_DATA(a), PyArray_DATA(b), PyArray_DATA(c),
+                          PyArray_DATA(d), PyArray_DATA(e), PyArray_DATA(fcoef),
+                          PyArray_DATA(g), PyArray_DATA(h), PyArray_DATA(icoef),
+                          PyArray_DATA(jcoef), dely, delx, bcy, bcx, optarg,
+                          undef, mxloop, tolerance, &overflow, &relerr, &loops);
+
+    Py_DECREF(a);
+    Py_DECREF(b);
+    Py_DECREF(c);
+    Py_DECREF(d);
+    Py_DECREF(e);
+    Py_DECREF(fcoef);
+    Py_DECREF(g);
+    Py_DECREF(h);
+    Py_DECREF(icoef);
+    Py_DECREF(jcoef);
+    return Py_BuildValue("Ndii", (PyObject *)s, relerr, overflow, loops);
+
+fail:
+    Py_XDECREF(s);
+    Py_XDECREF(a);
+    Py_XDECREF(b);
+    Py_XDECREF(c);
+    Py_XDECREF(d);
+    Py_XDECREF(e);
+    Py_XDECREF(fcoef);
+    Py_XDECREF(g);
+    Py_XDECREF(h);
+    Py_XDECREF(icoef);
+    Py_XDECREF(jcoef);
+    return NULL;
+}
+
+static PyObject *fishpack_fftpack_real(PyObject *args, int kind, int direction, const char *name)
+{
+    PyObject *x_obj;
+    PyArrayObject *x = NULL;
+
+    if (!PyArg_ParseTuple(args, "O", &x_obj)) {
+        return NULL;
+    }
+    x = as_fortran_double_copy(x_obj, 1, name);
+    if (x == NULL) {
+        return NULL;
+    }
+    const npy_intp n = PyArray_DIM(x, 0);
+    if (n < 1) {
+        PyErr_Format(PyExc_ValueError, "%s requires at least one sample", name);
+        Py_DECREF(x);
+        return NULL;
+    }
+    pyfp_fftpack_real_transform((int)n, PyArray_DATA(x), kind, direction);
+    return (PyObject *)x;
+}
+
+static PyObject *fishpack_fftpack_complex(PyObject *args, int direction, const char *name)
+{
+    PyObject *x_obj;
+    PyArrayObject *x = NULL;
+
+    if (!PyArg_ParseTuple(args, "O", &x_obj)) {
+        return NULL;
+    }
+    x = as_fortran_double_copy(x_obj, 1, name);
+    if (x == NULL) {
+        return NULL;
+    }
+    const npy_intp n2 = PyArray_DIM(x, 0);
+    if (n2 < 2 || n2 % 2 != 0) {
+        PyErr_Format(PyExc_ValueError, "%s expects an interleaved real/imag float64 array with even length", name);
+        Py_DECREF(x);
+        return NULL;
+    }
+    pyfp_fftpack_complex_transform((int)(n2 / 2), PyArray_DATA(x), direction);
+    return (PyObject *)x;
+}
+
+static PyObject *fishpack_rfftf(PyObject *self, PyObject *args)
+{
+    (void)self;
+    return fishpack_fftpack_real(args, 0, 0, "rfftf");
+}
+
+static PyObject *fishpack_rfftb(PyObject *self, PyObject *args)
+{
+    (void)self;
+    return fishpack_fftpack_real(args, 0, 1, "rfftb");
+}
+
+static PyObject *fishpack_sint(PyObject *self, PyObject *args)
+{
+    (void)self;
+    return fishpack_fftpack_real(args, 1, 0, "sint");
+}
+
+static PyObject *fishpack_cost(PyObject *self, PyObject *args)
+{
+    (void)self;
+    return fishpack_fftpack_real(args, 2, 0, "cost");
+}
+
+static PyObject *fishpack_sinqf(PyObject *self, PyObject *args)
+{
+    (void)self;
+    return fishpack_fftpack_real(args, 3, 0, "sinqf");
+}
+
+static PyObject *fishpack_sinqb(PyObject *self, PyObject *args)
+{
+    (void)self;
+    return fishpack_fftpack_real(args, 3, 1, "sinqb");
+}
+
+static PyObject *fishpack_cosqf(PyObject *self, PyObject *args)
+{
+    (void)self;
+    return fishpack_fftpack_real(args, 4, 0, "cosqf");
+}
+
+static PyObject *fishpack_cosqb(PyObject *self, PyObject *args)
+{
+    (void)self;
+    return fishpack_fftpack_real(args, 4, 1, "cosqb");
+}
+
+static PyObject *fishpack_cfftf(PyObject *self, PyObject *args)
+{
+    (void)self;
+    return fishpack_fftpack_complex(args, 0, "cfftf");
+}
+
+static PyObject *fishpack_cfftb(PyObject *self, PyObject *args)
+{
+    (void)self;
+    return fishpack_fftpack_complex(args, 1, "cfftb");
 }
 
 static PyObject *fishpack_hwsplr(PyObject *self, PyObject *args)
@@ -876,8 +1256,34 @@ static PyMethodDef fishpack_methods[] = {
      "Solve a one-dimensional variable-coefficient elliptic equation using the modern Fortran SOR backend."},
     {"sor_standard2d", (PyCFunction)fishpack_sor_standard2d, METH_VARARGS,
      "Solve a two-dimensional variable-coefficient elliptic equation using the modern Fortran SOR backend."},
+    {"sor_standard3d", (PyCFunction)fishpack_sor_standard3d, METH_VARARGS,
+     "Solve a three-dimensional variable-coefficient elliptic equation using the modern Fortran SOR backend."},
     {"sor_general2d", (PyCFunction)fishpack_sor_general2d, METH_VARARGS,
      "Solve a two-dimensional general-form elliptic equation using the modern Fortran SOR backend."},
+    {"sor_general3d", (PyCFunction)fishpack_sor_general3d, METH_VARARGS,
+     "Solve a three-dimensional general-form elliptic equation using the modern Fortran SOR backend."},
+    {"sor_biharmonic2d", (PyCFunction)fishpack_sor_biharmonic2d, METH_VARARGS,
+     "Solve a two-dimensional general-form biharmonic equation using the modern Fortran SOR backend."},
+    {"rfftf", (PyCFunction)fishpack_rfftf, METH_VARARGS,
+     "Apply the FFTPACK real periodic forward transform to a one-dimensional float64 array."},
+    {"rfftb", (PyCFunction)fishpack_rfftb, METH_VARARGS,
+     "Apply the FFTPACK real periodic backward transform to a one-dimensional float64 array."},
+    {"sint", (PyCFunction)fishpack_sint, METH_VARARGS,
+     "Apply the FFTPACK sine transform to a one-dimensional float64 array."},
+    {"cost", (PyCFunction)fishpack_cost, METH_VARARGS,
+     "Apply the FFTPACK cosine transform to a one-dimensional float64 array."},
+    {"sinqf", (PyCFunction)fishpack_sinqf, METH_VARARGS,
+     "Apply the FFTPACK quarter-wave sine forward transform to a one-dimensional float64 array."},
+    {"sinqb", (PyCFunction)fishpack_sinqb, METH_VARARGS,
+     "Apply the FFTPACK quarter-wave sine backward transform to a one-dimensional float64 array."},
+    {"cosqf", (PyCFunction)fishpack_cosqf, METH_VARARGS,
+     "Apply the FFTPACK quarter-wave cosine forward transform to a one-dimensional float64 array."},
+    {"cosqb", (PyCFunction)fishpack_cosqb, METH_VARARGS,
+     "Apply the FFTPACK quarter-wave cosine backward transform to a one-dimensional float64 array."},
+    {"cfftf", (PyCFunction)fishpack_cfftf, METH_VARARGS,
+     "Apply the FFTPACK complex forward transform to an interleaved real/imag float64 array."},
+    {"cfftb", (PyCFunction)fishpack_cfftb, METH_VARARGS,
+     "Apply the FFTPACK complex backward transform to an interleaved real/imag float64 array."},
     {NULL, NULL, 0, NULL}
 };
 

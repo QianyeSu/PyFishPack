@@ -36,6 +36,8 @@ __pycache__/
 *.dat
 /Debug/
 /build/
+/dist/
+wheelhouse/
 PyFishPack/build/
 reports/
 # Eclipse IDE files

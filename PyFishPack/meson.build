@@ -148,6 +148,7 @@ modern_fortran_sources = [
     'src/sepeli.f90',
     'src/sepx4.f90',
     'src/iterative_solvers.f90',
+    'src/fftpack_c_api.f90',
     'src/fishpack_c_api.f90',
 ]
 

@@ -43,9 +43,9 @@ F77_TO_F90 = {
 
 FORTRAN_BACKED_EQUATION_APIS = {
     "invert_3DOcean": "Cartesian, uniform-grid, constant-coefficient beta=0 subset backed by pois3d.",
-    "invert_BrethertonHaidvogel": "Cartesian, constant-depth Helmholtz subset backed by genbun; beta-plane forcing is supported for xarray coordinates and NumPy spacing.",
+    "invert_BrethertonHaidvogel": "Cartesian, constant-depth Helmholtz subset backed by genbun; beta-plane forcing is supported for labeled coordinates and NumPy spacing.",
     "invert_Eliassen": "Cartesian constant-coefficient B=0 subset backed by genbun; constant cross-derivative B!=0 subset backed by the modern Fortran SOR general2d kernel.",
-    "invert_Fofonoff": "Cartesian Helmholtz subset backed by genbun; beta-plane forcing is supported for xarray coordinates and NumPy spacing.",
+    "invert_Fofonoff": "Cartesian Helmholtz subset backed by genbun; beta-plane forcing is supported for labeled coordinates and NumPy spacing.",
     "invert_GillMatsuno": "Cartesian beta=0 subset backed by genbun; Cartesian beta-plane subset backed by the modern Fortran SOR general2d kernel.",
     "invert_GillMatsuno_test": "Cartesian, constant-Coriolis beta=0 test-form subset backed by genbun.",
     "invert_PV2D": "Cartesian, scalar-N2 constant-coefficient QG PV subset backed by genbun.",
@@ -54,10 +54,11 @@ FORTRAN_BACKED_EQUATION_APIS = {
     "invert_RefStateSWM": "Xinvert-style one-dimensional shallow-water reference-state equation backed by the modern Fortran SOR standard1d kernel.",
     "invert_Stommel": "Cartesian beta=0 subset backed by genbun; Cartesian beta-plane subset backed by the modern Fortran SOR general2d kernel.",
     "invert_StommelArons": "Cartesian beta=0 subset backed by genbun; Cartesian beta-plane subset backed by the modern Fortran SOR general2d kernel.",
-    "invert_StommelMunk": "Cartesian A4=0 subset that delegates to Stommel; A4!=0 biharmonic cases remain unsupported.",
+    "invert_StommelMunk": "Cartesian A4=0 subset delegates to Stommel; Cartesian A4!=0 biharmonic cases use the modern Fortran SOR biharmonic2d kernel.",
     "invert_Stommel_test": "Cartesian test-form subset delegated to Stommel; beta=0 uses genbun and beta-plane uses the modern Fortran SOR general2d kernel.",
     "invert_geostrophic": "Cartesian constant-Coriolis beta=0 subset backed by genbun; Cartesian beta-plane subset backed by the modern Fortran SOR standard2d kernel.",
-    "invert_omega": "Cartesian, scalar-N2, beta=0 3D QG omega subset backed by pois3d.",
+    "invert_omega": "Cartesian, scalar-N2, beta=0 3D QG omega subset backed by pois3d; Cartesian beta-plane subset uses the modern Fortran SOR standard3d kernel.",
+    "spectral_transform": "Lightweight one-dimensional FFTPACK transform helper backed by modern Fortran rfft/cfft/sine/cosine kernels.",
 }
 
 

@@ -1,0 +1,165 @@
+name: Build wheels
+
+on:
+  push:
+    branches: [dev, main]
+    tags: ["v*"]
+  pull_request:
+    branches: [dev, main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build_wheels:
+    name: Build wheel ${{ matrix.python }}-${{ matrix.platform[1] }}
+    runs-on: ${{ matrix.platform[0] }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - [ubuntu-latest, manylinux_x86_64]
+          - [ubuntu-latest, manylinux2014_x86_64]
+          - [macos-14, macosx_arm64]
+          - [macos-15-intel, macosx_x86_64]
+          - [windows-2022, win_amd64]
+        python: ["cp39", "cp310", "cp311", "cp312", "cp313"]
+        exclude:
+          - platform: [ubuntu-latest, manylinux2014_x86_64]
+            python: cp311
+          - platform: [ubuntu-latest, manylinux2014_x86_64]
+            python: cp312
+          - platform: [ubuntu-latest, manylinux2014_x86_64]
+            python: cp313
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Setup Linux build deps
+        if: startsWith(matrix.platform[1], 'manylinux')
+        run: |
+          echo "CIBW_BEFORE_BUILD_LINUX=yum install -y gcc-gfortran || dnf install -y gcc-gfortran || echo 'gfortran install failed'" >> "$GITHUB_ENV"
+          if [ "${{ matrix.platform[1] }}" = "manylinux2014_x86_64" ]; then
+            echo "CIBW_MANYLINUX_X86_64_IMAGE=manylinux2014" >> "$GITHUB_ENV"
+          else
+            echo "CIBW_MANYLINUX_X86_64_IMAGE=manylinux_2_28" >> "$GITHUB_ENV"
+          fi
+
+      - name: Setup macOS toolchain
+        if: startsWith(matrix.platform[0], 'macos')
+        shell: bash
+        run: |
+          set -euxo pipefail
+          export HOMEBREW_NO_AUTO_UPDATE=1
+          brew list gcc >/dev/null 2>&1 || brew install gcc
+
+          GCC_PREFIX="$(brew --prefix gcc)"
+          GCC_BIN_DIR="${GCC_PREFIX}/bin"
+          CC_BIN="$(compgen -G "${GCC_BIN_DIR}/gcc-[0-9]*" | sort -V | tail -1)"
+          CXX_BIN="$(compgen -G "${GCC_BIN_DIR}/g++-[0-9]*" | sort -V | tail -1)"
+          FC_BIN="$(compgen -G "${GCC_BIN_DIR}/gfortran-[0-9]*" | sort -V | tail -1)"
+
+          test -n "${CC_BIN}"
+          test -n "${CXX_BIN}"
+          test -n "${FC_BIN}"
+
+          echo "${GCC_BIN_DIR}" >> "$GITHUB_PATH"
+          echo "MACOS_CC=${CC_BIN}" >> "$GITHUB_ENV"
+          echo "MACOS_CXX=${CXX_BIN}" >> "$GITHUB_ENV"
+          echo "MACOS_FC=${FC_BIN}" >> "$GITHUB_ENV"
+          echo "MACOS_F77=${FC_BIN}" >> "$GITHUB_ENV"
+          echo "MACOS_F90=${FC_BIN}" >> "$GITHUB_ENV"
+
+      - name: Setup Windows MSYS2
+        if: matrix.platform[1] == 'win_amd64'
+        uses: msys2/setup-msys2@v2
+        with:
+          update: true
+          install: >-
+            mingw-w64-x86_64-gcc-fortran
+            mingw-w64-x86_64-pkgconf
+
+      - name: Expose Windows toolchain
+        if: matrix.platform[1] == 'win_amd64'
+        shell: pwsh
+        run: |
+          function Resolve-MsysTool([string]$name) {
+            $candidates = @(
+              (Join-Path $env:RUNNER_TEMP "msys64\mingw64\bin\$name.exe"),
+              "D:\a\_temp\msys64\mingw64\bin\$name.exe",
+              "C:\msys64\mingw64\bin\$name.exe"
+            )
+            foreach ($candidate in $candidates) {
+              if (Test-Path $candidate) {
+                return (Resolve-Path $candidate).Path
+              }
+            }
+            throw "Could not resolve MSYS2 tool: $name.exe"
+          }
+
+          $gcc = Resolve-MsysTool "gcc"
+          $gxx = Resolve-MsysTool "g++"
+          $gfortran = Resolve-MsysTool "gfortran"
+          $pkgConfig = Resolve-MsysTool "pkg-config"
+          $mingwBin = Split-Path $gcc -Parent
+
+          $mingwBin | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          "MSYS2_CC=$($gcc -replace '\\','/')" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "MSYS2_CXX=$($gxx -replace '\\','/')" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "MSYS2_FC=$($gfortran -replace '\\','/')" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "MSYS2_F77=$($gfortran -replace '\\','/')" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "MSYS2_F90=$($gfortran -replace '\\','/')" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "MSYS2_PKG_CONFIG=$($pkgConfig -replace '\\','/')" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          pip install delvewheel
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v3.4.1
+        with:
+          output-dir: wheelhouse
+        env:
+          CIBW_BUILD: ${{ matrix.python }}-${{ matrix.platform[1] }}
+          CIBW_SKIP: "*-musllinux*"
+          CIBW_TEST_COMMAND: python -c "import PyFishPack; print(PyFishPack.__version__)"
+          CIBW_BUILD_VERBOSITY: 1
+          CIBW_BEFORE_BUILD: python -m pip install meson ninja
+          CIBW_ENVIRONMENT_LINUX: FC=gfortran F77=gfortran F90=gfortran CC=gcc
+          CIBW_ENVIRONMENT_MACOS: FC=${{ env.MACOS_FC }} F77=${{ env.MACOS_F77 }} F90=${{ env.MACOS_F90 }} CC=${{ env.MACOS_CC }} CXX=${{ env.MACOS_CXX }}
+          CIBW_ENVIRONMENT_WINDOWS: FC=${{ env.MSYS2_FC }} F77=${{ env.MSYS2_F77 }} F90=${{ env.MSYS2_F90 }} CC=${{ env.MSYS2_CC }} CXX=${{ env.MSYS2_CXX }} PKG_CONFIG=${{ env.MSYS2_PKG_CONFIG }}
+          CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: delvewheel repair -w {dest_dir} {wheel}
+
+      - name: Upload wheels
+        uses: actions/upload-artifact@v7
+        with:
+          name: wheel-${{ matrix.python }}-${{ matrix.platform[1] }}
+          path: wheelhouse/*.whl
+
+  build_sdist:
+    name: Build source distribution
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Build sdist
+        run: |
+          python -m pip install --upgrade pip build
+          python -m build --sdist
+
+      - name: Upload sdist
+        uses: actions/upload-artifact@v7
+        with:
+          name: sdist
+          path: dist/*.tar.gz

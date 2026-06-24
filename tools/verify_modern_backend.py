@@ -73,7 +73,20 @@ def check_backend_methods(pyfishpack: Any) -> dict[str, Any]:
         "hstcsp",
         "sor_standard1d",
         "sor_standard2d",
+        "sor_standard3d",
         "sor_general2d",
+        "sor_general3d",
+        "sor_biharmonic2d",
+        "rfftf",
+        "rfftb",
+        "sint",
+        "cost",
+        "sinqf",
+        "sinqb",
+        "cosqf",
+        "cosqb",
+        "cfftf",
+        "cfftb",
     }
     methods = {name for name in dir(pyfishpack.fishpack) if not name.startswith("_")}
     missing = sorted(expected - methods)
@@ -171,6 +184,213 @@ def check_sor_general2d_backend(pyfishpack: Any) -> dict[str, Any]:
     checked = _assert_close("sor_general2d manufactured solution", max_error, 0.0, 1e-8)
     checked.update({"relerr": float(relerr), "loops": int(loops)})
     return checked
+
+
+def check_sor_standard3d_backend(pyfishpack: Any) -> dict[str, Any]:
+    nz, ny, nx = 12, 13, 14
+    dz, dy, dx = 1.2, 0.9, 1.1
+    alpha_z, alpha_y, alpha_x = 0.7, 1.2, 0.9
+    k = np.arange(nz, dtype=np.float64)[:, None, None]
+    j = np.arange(ny, dtype=np.float64)[None, :, None]
+    i = np.arange(nx, dtype=np.float64)[None, None, :]
+    exact = (
+        np.sin(math.pi * k / (nz - 1.0))
+        * np.sin(math.pi * j / (ny - 1.0))
+        * np.sin(math.pi * i / (nx - 1.0))
+    )
+    force = _discrete_constant_3d_fixed(exact, dz, dy, dx, alpha_z, alpha_y, alpha_x)
+    solution, relerr, overflow, loops = pyfishpack.fishpack.sor_standard3d(
+        np.zeros_like(exact),
+        np.full_like(exact, alpha_z),
+        np.full_like(exact, alpha_y),
+        np.full_like(exact, alpha_x),
+        force,
+        dz,
+        dy,
+        dx,
+        "fixed",
+        "fixed",
+        "fixed",
+        1.6,
+        -9.99e8,
+        50000,
+        1e-12,
+    )
+    if overflow:
+        raise AssertionError("sor_standard3d overflowed")
+    max_error = float(np.max(np.abs(solution - exact)))
+    checked = _assert_close("sor_standard3d manufactured solution", max_error, 0.0, 1e-8)
+    checked.update({"relerr": float(relerr), "loops": int(loops)})
+    return checked
+
+
+def check_sor_general3d_backend(pyfishpack: Any) -> dict[str, Any]:
+    nz, ny, nx = 12, 13, 14
+    dz, dy, dx = 1.2, 0.9, 1.1
+    alpha_z, alpha_y, alpha_x = 0.7, 1.2, 0.9
+    dzcoef, dycoef, dxcoef = 0.05, -0.03, 0.02
+    helmholtz = -0.11
+    k = np.arange(nz, dtype=np.float64)[:, None, None]
+    j = np.arange(ny, dtype=np.float64)[None, :, None]
+    i = np.arange(nx, dtype=np.float64)[None, None, :]
+    exact = (
+        np.sin(math.pi * k / (nz - 1.0))
+        * np.sin(math.pi * j / (ny - 1.0))
+        * np.sin(math.pi * i / (nx - 1.0))
+    )
+    force = np.zeros_like(exact)
+    force[1:-1, 1:-1, 1:-1] = (
+        alpha_z
+        * (exact[2:, 1:-1, 1:-1] - 2.0 * exact[1:-1, 1:-1, 1:-1] + exact[:-2, 1:-1, 1:-1])
+        / (dz * dz)
+        + alpha_y
+        * (exact[1:-1, 2:, 1:-1] - 2.0 * exact[1:-1, 1:-1, 1:-1] + exact[1:-1, :-2, 1:-1])
+        / (dy * dy)
+        + alpha_x
+        * (exact[1:-1, 1:-1, 2:] - 2.0 * exact[1:-1, 1:-1, 1:-1] + exact[1:-1, 1:-1, :-2])
+        / (dx * dx)
+        + dzcoef * (exact[2:, 1:-1, 1:-1] - exact[:-2, 1:-1, 1:-1]) / (2.0 * dz)
+        + dycoef * (exact[1:-1, 2:, 1:-1] - exact[1:-1, :-2, 1:-1]) / (2.0 * dy)
+        + dxcoef * (exact[1:-1, 1:-1, 2:] - exact[1:-1, 1:-1, :-2]) / (2.0 * dx)
+        + helmholtz * exact[1:-1, 1:-1, 1:-1]
+    )
+    solution, relerr, overflow, loops = pyfishpack.fishpack.sor_general3d(
+        np.zeros_like(exact),
+        np.full_like(exact, alpha_z),
+        np.full_like(exact, alpha_y),
+        np.full_like(exact, alpha_x),
+        np.full_like(exact, dzcoef),
+        np.full_like(exact, dycoef),
+        np.full_like(exact, dxcoef),
+        np.full_like(exact, helmholtz),
+        force,
+        dz,
+        dy,
+        dx,
+        "fixed",
+        "fixed",
+        "fixed",
+        1.6,
+        -9.99e8,
+        50000,
+        1e-12,
+    )
+    if overflow:
+        raise AssertionError("sor_general3d overflowed")
+    max_error = float(np.max(np.abs(solution - exact)))
+    checked = _assert_close("sor_general3d manufactured solution", max_error, 0.0, 1e-8)
+    checked.update({"relerr": float(relerr), "loops": int(loops)})
+    return checked
+
+
+def _discrete_biharmonic2d_fixed(
+    exact: np.ndarray,
+    dy: float,
+    dx: float,
+    acoef: float,
+    bcoef: float,
+    ccoef: float,
+    dcoef: float,
+    ecoef: float,
+    fcoef: float,
+    gcoef: float,
+    hcoef: float,
+    icoef: float,
+) -> np.ndarray:
+    force = np.zeros_like(exact)
+    force[2:-2, 2:-2] = (
+        acoef
+        * (exact[4:, 2:-2] - 4.0 * exact[3:-1, 2:-2] + 6.0 * exact[2:-2, 2:-2] - 4.0 * exact[1:-3, 2:-2] + exact[:-4, 2:-2])
+        / (dy**4)
+        + bcoef
+        * (
+            exact[4:, 4:] - 2.0 * exact[4:, 2:-2] + exact[4:, :-4]
+            - 2.0 * exact[2:-2, 4:] + 4.0 * exact[2:-2, 2:-2] - 2.0 * exact[2:-2, :-4]
+            + exact[:-4, 4:] - 2.0 * exact[:-4, 2:-2] + exact[:-4, :-4]
+        )
+        / (16.0 * dy * dy * dx * dx)
+        + ccoef
+        * (exact[2:-2, 4:] - 4.0 * exact[2:-2, 3:-1] + 6.0 * exact[2:-2, 2:-2] - 4.0 * exact[2:-2, 1:-3] + exact[2:-2, :-4])
+        / (dx**4)
+        + dcoef
+        * (exact[3:-1, 2:-2] - 2.0 * exact[2:-2, 2:-2] + exact[1:-3, 2:-2])
+        / (dy * dy)
+        + ecoef
+        * (exact[3:-1, 3:-1] - exact[1:-3, 3:-1] - exact[3:-1, 1:-3] + exact[1:-3, 1:-3])
+        / (4.0 * dy * dx)
+        + fcoef
+        * (exact[2:-2, 3:-1] - 2.0 * exact[2:-2, 2:-2] + exact[2:-2, 1:-3])
+        / (dx * dx)
+        + gcoef * (exact[3:-1, 2:-2] - exact[1:-3, 2:-2]) / (2.0 * dy)
+        + hcoef * (exact[2:-2, 3:-1] - exact[2:-2, 1:-3]) / (2.0 * dx)
+        + icoef * exact[2:-2, 2:-2]
+    )
+    return force
+
+
+def check_sor_biharmonic2d_backend(pyfishpack: Any) -> dict[str, Any]:
+    ny, nx = 30, 32
+    dy, dx = 1.1, 0.9
+    acoef, bcoef, ccoef = 0.08, 0.0, 0.08
+    dcoef, ecoef, fcoef = -0.65, 0.0, -0.65
+    gcoef, hcoef, icoef = 0.0, -0.03, 0.0
+    y = np.arange(ny, dtype=np.float64)[:, None]
+    x = np.arange(nx, dtype=np.float64)[None, :]
+    exact = np.sin(math.pi * y / (ny - 1.0)) * np.sin(math.pi * x / (nx - 1.0))
+    force = _discrete_biharmonic2d_fixed(
+        exact, dy, dx, acoef, bcoef, ccoef, dcoef, ecoef, fcoef, gcoef, hcoef, icoef
+    )
+    init = np.zeros_like(exact)
+    init[:2, :] = exact[:2, :]
+    init[-2:, :] = exact[-2:, :]
+    init[:, :2] = exact[:, :2]
+    init[:, -2:] = exact[:, -2:]
+    solution, relerr, overflow, loops = pyfishpack.fishpack.sor_biharmonic2d(
+        init,
+        np.full_like(exact, acoef),
+        np.full_like(exact, bcoef),
+        np.full_like(exact, ccoef),
+        np.full_like(exact, dcoef),
+        np.full_like(exact, ecoef),
+        np.full_like(exact, fcoef),
+        np.full_like(exact, gcoef),
+        np.full_like(exact, hcoef),
+        np.full_like(exact, icoef),
+        force,
+        dy,
+        dx,
+        "fixed",
+        "fixed",
+        1.55,
+        -9.99e8,
+        50000,
+        1e-12,
+    )
+    if overflow:
+        raise AssertionError("sor_biharmonic2d overflowed")
+    max_error = float(np.max(np.abs(solution - exact)))
+    checked = _assert_close("sor_biharmonic2d manufactured solution", max_error, 0.0, 1e-8)
+    checked.update({"relerr": float(relerr), "loops": int(loops)})
+    return checked
+
+
+def check_fftpack_transforms(pyfishpack: Any) -> dict[str, Any]:
+    real = np.sin(np.linspace(0.0, 2.0 * math.pi, 24, endpoint=False)) + 0.25 * np.cos(
+        np.linspace(0.0, 4.0 * math.pi, 24, endpoint=False)
+    )
+    coeff = pyfishpack.spectral_transform(real, kind="rfft", direction="forward")
+    restored = pyfishpack.spectral_transform(coeff, kind="rfft", direction="inverse", normalize=True)
+    real_error = float(np.max(np.abs(restored - real)))
+
+    complex_input = np.exp(1j * np.linspace(0.0, 2.0 * math.pi, 18, endpoint=False))
+    ccoeff = pyfishpack.spectral_transform(complex_input, kind="cfft", direction="forward")
+    crestored = pyfishpack.spectral_transform(ccoeff, kind="cfft", direction="inverse", normalize=True)
+    complex_error = float(np.max(np.abs(crestored - complex_input)))
+
+    return {
+        "rfft_roundtrip": _assert_close("FFTPACK rfft roundtrip", real_error, 0.0, 1e-12),
+        "cfft_roundtrip": _assert_close("FFTPACK cfft roundtrip", complex_error, 0.0, 1e-12),
+    }
 
 
 def check_genbun_example(pyfishpack: Any) -> dict[str, Any]:
@@ -1455,20 +1675,43 @@ def check_high_level_stommel_munk(pyfishpack: Any) -> dict[str, Any]:
         "invert_StommelMunk A4=0 manufactured solution", max_error, 0.0, 5e-12
     )
 
-    try:
-        pyfishpack.invert_StommelMunk(
-            curl,
-            coords="cartesian",
-            mParams={"A4": 1.0, "beta": 0.0, "R": resistance, "D": depth, "rho0": rho0},
-            BCs=("fixed", "fixed"),
-            spacing=(dy, dx),
-        )
-    except NotImplementedError as exc:
-        rejected = str(exc)
-    else:
-        raise AssertionError("invert_StommelMunk accepted unsupported A4!=0")
+    a4 = 0.06
+    beta = 0.018
+    rhs_bih = _discrete_biharmonic2d_fixed(
+        exact,
+        dy,
+        dx,
+        a4,
+        0.0,
+        a4,
+        -resistance / depth,
+        0.0,
+        -resistance / depth,
+        0.0,
+        -beta,
+        0.0,
+    )
+    curl_bih = -rhs_bih * depth * rho0
+    init = np.zeros_like(exact)
+    init[:2, :] = exact[:2, :]
+    init[-2:, :] = exact[-2:, :]
+    init[:, :2] = exact[:, :2]
+    init[:, -2:] = exact[:, -2:]
+    solution_bih = pyfishpack.invert_StommelMunk(
+        curl_bih,
+        coords="cartesian",
+        icbc=init,
+        mParams={"A4": a4, "beta": beta, "R": resistance, "D": depth, "rho0": rho0},
+        iParams={"mxLoop": 50000, "tolerance": 1e-12, "optArg": 1.55},
+        BCs=("fixed", "fixed"),
+        spacing=(dy, dx),
+    )
+    max_error_bih = float(np.max(np.abs(solution_bih - exact)))
+    accepted_bih = _assert_close(
+        "invert_StommelMunk A4!=0 manufactured solution", max_error_bih, 0.0, 1e-8
+    )
 
-    return {"a4_zero": accepted, "a4_nonzero_rejected": rejected}
+    return {"a4_zero": accepted, "a4_nonzero": accepted_bih}
 
 
 def check_high_level_stommel_arons(pyfishpack: Any) -> dict[str, Any]:
@@ -1558,6 +1801,48 @@ def check_high_level_omega(pyfishpack: Any) -> dict[str, Any]:
     return _assert_close("invert_omega manufactured solution", max_error, 0.0, 5e-12)
 
 
+def check_high_level_omega_beta(pyfishpack: Any) -> dict[str, Any]:
+    nz, ny, nx = 12, 13, 14
+    dz, dy, dx = 1.2, 0.9, 1.1
+    f0 = 0.7
+    beta = 0.02
+    n2 = 1.1
+    k = np.arange(nz, dtype=np.float64)[:, None, None]
+    j = np.arange(ny, dtype=np.float64)[None, :, None]
+    i = np.arange(nx, dtype=np.float64)[None, None, :]
+    y = np.arange(ny, dtype=np.float64)[None, :, None] * dy
+    acoef = (f0 + beta * y) ** 2
+    exact = (
+        np.sin(math.pi * k / (nz - 1.0))
+        * np.sin(math.pi * j / (ny - 1.0))
+        * np.sin(math.pi * i / (nx - 1.0))
+    )
+    forcing = np.zeros_like(exact)
+    forcing[1:-1, 1:-1, 1:-1] = (
+        acoef[:, 1:-1, :]
+        * (exact[2:, 1:-1, 1:-1] - exact[1:-1, 1:-1, 1:-1])
+        - acoef[:, 1:-1, :]
+        * (exact[1:-1, 1:-1, 1:-1] - exact[:-2, 1:-1, 1:-1])
+    ) / (dz * dz)
+    forcing[1:-1, 1:-1, 1:-1] += n2 * (
+        (exact[1:-1, 2:, 1:-1] - 2.0 * exact[1:-1, 1:-1, 1:-1] + exact[1:-1, :-2, 1:-1])
+        / (dy * dy)
+        + (exact[1:-1, 1:-1, 2:] - 2.0 * exact[1:-1, 1:-1, 1:-1] + exact[1:-1, 1:-1, :-2])
+        / (dx * dx)
+    )
+
+    solution = pyfishpack.invert_omega(
+        forcing,
+        coords="cartesian",
+        mParams={"f0": f0, "beta": beta, "N2": n2},
+        iParams={"mxLoop": 50000, "tolerance": 1e-12},
+        BCs=("fixed", "fixed", "fixed"),
+        spacing=(dz, dy, dx),
+    )
+    max_error = float(np.max(np.abs(solution - exact)))
+    return _assert_close("invert_omega beta-plane manufactured solution", max_error, 0.0, 1e-8)
+
+
 def check_high_level_3d_ocean(pyfishpack: Any) -> dict[str, Any]:
     nz, ny, nx = 16, 18, 20
     dz, dy, dx = 1.25, 0.95, 1.05
@@ -1594,6 +1879,66 @@ def check_high_level_3d_ocean(pyfishpack: Any) -> dict[str, Any]:
     )
     max_error = float(np.max(np.abs(solution - exact)))
     return _assert_close("invert_3DOcean manufactured solution", max_error, 0.0, 5e-12)
+
+
+def check_high_level_3d_ocean_beta(pyfishpack: Any) -> dict[str, Any]:
+    nz, ny, nx = 12, 13, 14
+    dz, dy, dx = 1.2, 0.9, 1.1
+    epsilon = 1.3
+    f0 = 0.7
+    beta = 0.02
+    n2 = 1.1
+    buoyancy_damping = 0.8
+    vertical = buoyancy_damping / n2
+    k = np.arange(nz, dtype=np.float64)[:, None, None]
+    j = np.arange(ny, dtype=np.float64)[None, :, None]
+    i = np.arange(nx, dtype=np.float64)[None, None, :]
+    y = np.arange(ny, dtype=np.float64)[None, :, None] * dy
+    coriolis = f0 + beta * y
+    denom = epsilon * epsilon + coriolis * coriolis
+    c1 = epsilon / denom
+    c1_dy = -2.0 * epsilon * coriolis * beta / (denom * denom)
+    c2_dy = beta * (epsilon * epsilon - coriolis * coriolis) / (denom * denom)
+    exact = (
+        np.sin(math.pi * k / (nz - 1.0))
+        * np.sin(math.pi * j / (ny - 1.0))
+        * np.sin(math.pi * i / (nx - 1.0))
+    )
+    forcing = np.zeros_like(exact)
+    forcing[1:-1, 1:-1, 1:-1] = (
+        vertical
+        * (exact[2:, 1:-1, 1:-1] - 2.0 * exact[1:-1, 1:-1, 1:-1] + exact[:-2, 1:-1, 1:-1])
+        / (dz * dz)
+        + c1[:, 1:-1, :]
+        * (exact[1:-1, 2:, 1:-1] - 2.0 * exact[1:-1, 1:-1, 1:-1] + exact[1:-1, :-2, 1:-1])
+        / (dy * dy)
+        + c1[:, 1:-1, :]
+        * (exact[1:-1, 1:-1, 2:] - 2.0 * exact[1:-1, 1:-1, 1:-1] + exact[1:-1, 1:-1, :-2])
+        / (dx * dx)
+        + c1_dy[:, 1:-1, :]
+        * (exact[1:-1, 2:, 1:-1] - exact[1:-1, :-2, 1:-1])
+        / (2.0 * dy)
+        - c2_dy[:, 1:-1, :]
+        * (exact[1:-1, 1:-1, 2:] - exact[1:-1, 1:-1, :-2])
+        / (2.0 * dx)
+    )
+
+    solution = pyfishpack.invert_3DOcean(
+        forcing,
+        coords="cartesian",
+        mParams={
+            "f0": f0,
+            "beta": beta,
+            "epsilon": epsilon,
+            "N2": n2,
+            "k": buoyancy_damping,
+        },
+        iParams={"mxLoop": 50000, "tolerance": 1e-12},
+        BCs=("fixed", "fixed", "fixed"),
+        spacing=(dz, dy, dx),
+    )
+    max_error = float(np.max(np.abs(solution - exact)))
+    return _assert_close("invert_3DOcean beta-plane manufactured solution", max_error, 0.0, 1e-8)
 
 
 def check_high_level_refstate(pyfishpack: Any) -> dict[str, Any]:
@@ -1811,7 +2156,11 @@ def main() -> int:
         "checks": {
             "sor_standard1d_residual": check_sor_standard1d_backend(pyfishpack),
             "sor_standard2d_residual": check_sor_standard2d_backend(pyfishpack),
+            "sor_standard3d_manufactured": check_sor_standard3d_backend(pyfishpack),
             "sor_general2d_manufactured": check_sor_general2d_backend(pyfishpack),
+            "sor_general3d_manufactured": check_sor_general3d_backend(pyfishpack),
+            "sor_biharmonic2d_manufactured": check_sor_biharmonic2d_backend(pyfishpack),
+            "fftpack_transform_roundtrip": check_fftpack_transforms(pyfishpack),
             "genbun_ucar_example": check_genbun_example(pyfishpack),
             "poistg_ucar_example": check_poistg_example(pyfishpack),
             "pois3d_ucar_example": check_pois3d_example(pyfishpack),
@@ -1847,7 +2196,9 @@ def main() -> int:
             "invert_stommel_arons_manufactured": check_high_level_stommel_arons(pyfishpack),
             "invert_stommel_arons_beta_fortran_sor": check_high_level_stommel_arons_beta(pyfishpack),
             "invert_omega_manufactured": check_high_level_omega(pyfishpack),
+            "invert_omega_beta_fortran_sor": check_high_level_omega_beta(pyfishpack),
             "invert_3d_ocean_manufactured": check_high_level_3d_ocean(pyfishpack),
+            "invert_3d_ocean_beta_fortran_sor": check_high_level_3d_ocean_beta(pyfishpack),
             "invert_refstate_fortran_sor": check_high_level_refstate(pyfishpack),
             "invert_refstate_swm_fortran_sor": check_high_level_refstate_swm(pyfishpack),
             "genbun_size_sweep": check_genbun_size_sweep(pyfishpack),
