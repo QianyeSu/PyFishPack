@@ -359,7 +359,7 @@ def read_readme():
 # Configuration for mixed build
 setup_config = {
     "name": "PyFishPack",
-    "version": "1.0.0",
+    "version": "0.1.0",
     "description": "Python wrapper for FISHPACK - Fortran finite difference Poisson solvers",
     "long_description": read_readme(),
     "long_description_content_type": "text/markdown",

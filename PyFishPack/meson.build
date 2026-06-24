@@ -3,7 +3,7 @@ project(
     'pyfishpack',
     'c',
     'fortran',
-    version: '1.0.0',
+    version: '0.1.0',
     default_options: ['warning_level=2', 'buildtype=release', 'b_lto=true'],
 )
 

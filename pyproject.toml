@@ -10,7 +10,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "PyFishPack"
-version = "1.0.0"
+version = "0.1.0"
 description = "Python wrapper for FISHPACK - Fast direct solvers for separable elliptic PDEs"
 readme = "README.md"
 authors = [{ name = "PyFishPack Contributors" }]
